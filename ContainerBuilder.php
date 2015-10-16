@@ -4,7 +4,6 @@ namespace Poirot\Container;
 use Poirot\Container\Interfaces\iContainerBuilder;
 use Poirot\Container\Interfaces\iCService;
 use Poirot\Container\Interfaces\iCServiceInitializer;
-use Poirot\Container\Service\FunctorService;
 use Poirot\Container\Service\InstanceService;
 use Poirot\Core\AbstractOptions;
 use Poirot\Core\BuilderSetterTrait;
