@@ -11,6 +11,7 @@
     ],
     "require": {
         "poirot/core": "dev-master"
+        , "poirot/loader": "dev-master"
     },
     "target-dir": "Poirot/Container",
     "autoload"  : {

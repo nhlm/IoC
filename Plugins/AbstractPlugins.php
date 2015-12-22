@@ -3,9 +3,23 @@ namespace Poirot\Container\Plugins;
 
 use Poirot\Container\Container;
 use Poirot\Container\Exception\ContainerInvalidPluginException;
+use Poirot\Container\Interfaces\iCService;
+use Poirot\Container\Service\InstanceService;
+use Poirot\Loader\Interfaces\iLoader;
+use Poirot\Loader\Interfaces\iLoaderProvider;
+use Poirot\Loader\ResourceMapResolver;
 
 abstract class AbstractPlugins extends Container
+    implements iLoaderProvider
 {
+    protected $loader_resources = [
+        # 'canonicalized_name' => string(ClassName) // class can be instance of iCService or not
+        # 'canonicalized_name' => iCService|Object
+    ];
+
+    /** @var iLoader|ResourceMapResolver */
+    protected $resolver;
+
     /**
      * Validate Plugin Instance Object
      *
@@ -27,6 +41,8 @@ abstract class AbstractPlugins extends Container
      */
     function get($serviceName, $invOpt = [])
     {
+        $this->__attainServiceFromLoader($serviceName);
+        
         $return = parent::get($serviceName, $invOpt);
         $this->validatePlugin($return);
 
@@ -44,10 +60,58 @@ abstract class AbstractPlugins extends Container
      */
     function fresh($serviceName, $invOpt = [])
     {
+        $this->__attainServiceFromLoader($serviceName);
+
         $return = parent::fresh($serviceName, $invOpt);
         $this->validatePlugin($return);
 
         return $return;
+    }
+
+    protected function __attainServiceFromLoader($serviceName)
+    {
+        if (parent::has($serviceName))
+            return;
+
+
+        $serviceName = $this->__canonicalizeName($serviceName);
+
+        ## maybe resolved as loader plugin
+        if ($resolved = $this->resolver()->resolve($serviceName)) {
+            $service = $resolved;
+            if (is_string($resolved)) {
+                if (!class_exists($resolved))
+                    throw new \RuntimeException(sprintf(
+                        'Class (%s) not found for (%s) service with Loader Resource.'
+                        ,$resolved ,$serviceName
+                    ));
+
+                $service = new $resolved();
+            }
+
+            if (!$service instanceof iCService)
+                $service = new InstanceService($serviceName, $service);
+
+            ### set service so be can retrieved later
+            $this->set($service);
+        }
+    }
+
+
+    /**
+     * Check for a registered instance
+     *
+     * @param string $serviceName Service Name
+     *
+     * @return boolean
+     */
+    function has($serviceName)
+    {
+        $has = parent::has($serviceName);
+        if ($has)
+            return $has;
+
+        return (boolean) $this->resolver()->resolve($serviceName);
     }
 
     /**
@@ -69,5 +133,24 @@ abstract class AbstractPlugins extends Container
             ));
 
         return parent::nest($container, $namespace);
+    }
+
+
+    // Implement Loader:
+
+    /**
+     * Loader Resolver
+     *
+     * ! it may more useful when store resource
+     *   with canonicalized names.
+     *
+     * @return iLoader
+     */
+    function resolver()
+    {
+        if (!$this->resolver)
+            $this->resolver = new ResourceMapResolver($this->loader_resources);
+
+        return $this->resolver;
     }
 }
