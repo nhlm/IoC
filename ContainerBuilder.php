@@ -95,7 +95,7 @@ class ContainerBuilder
      */
     function __construct(array $options = [])
     {
-       if (!empty($options))
+        if (!empty($options))
            $this->setupFromArray($options, true);
     }
 

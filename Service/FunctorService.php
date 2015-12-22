@@ -48,7 +48,7 @@ class FunctorService extends AbstractService
      * Construct
      *
      * also can used as:
-     * - new FunctorService('name', [$this, 'method']);
+     * - new FunctorService('name', function() {});
      * or setter set
      * - new FunctorService([ 'callable' => [..] ..options])
      *

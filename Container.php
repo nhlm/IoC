@@ -126,7 +126,7 @@ class Container implements iContainer
      */
     function setInterface($serviceName, $interface)
     {
-        if ($this->has($serviceName))
+        if (self::has($serviceName))
             throw new \Exception(
                 "Service ({$serviceName}) is implemented; can't define interface after set service."
             );
@@ -174,7 +174,7 @@ class Container implements iContainer
         $name  = $service->getName();
 
         $cName = $this->__canonicalizeName($name);
-        if ($this->has($name))
+        if (self::has($name))
             if (!$this->services[$cName]->getAllowOverride())
                 throw new \Exception(sprintf(
                     'A service by the name or alias (%s) already exists and cannot be overridden; please use an alternate name',
