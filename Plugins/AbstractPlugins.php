@@ -121,7 +121,7 @@ abstract class AbstractPlugins extends Container
      */
     function listServices()
     {
-        return array_keys($this->services);
+        return array_merge(array_keys($this->loader_resources), array_keys($this->services));
     }
 
 
@@ -155,7 +155,7 @@ abstract class AbstractPlugins extends Container
      * ! it may more useful when store resource
      *   with canonicalized names.
      *
-     * @return iLoader
+     * @return ResourceMapResolver|iLoader
      */
     function resolver()
     {
