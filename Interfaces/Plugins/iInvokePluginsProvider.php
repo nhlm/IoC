@@ -10,5 +10,5 @@ interface iInvokePluginsProvider
      *
      * @return InvokablePlugins
      */
-    function plugin();
+    function plg();
 }

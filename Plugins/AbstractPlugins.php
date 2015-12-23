@@ -97,7 +97,6 @@ abstract class AbstractPlugins extends Container
         }
     }
 
-
     /**
      * Check for a registered instance
      *
@@ -113,6 +112,18 @@ abstract class AbstractPlugins extends Container
 
         return (boolean) $this->resolver()->resolve($serviceName);
     }
+
+
+    /**
+     * List Whole Registered Plugins
+     *
+     * @return array[string]
+     */
+    function listServices()
+    {
+        return array_keys($this->services);
+    }
+
 
     /**
      * @override
