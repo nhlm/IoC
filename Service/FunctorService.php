@@ -64,7 +64,7 @@ class FunctorService extends AbstractService
         }
         else
             ## ['callable' => '..', ..]
-            $this->from($options);
+            parent::__construct($options);
     }
 
     /**
