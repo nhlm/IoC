@@ -14,7 +14,7 @@ use Poirot\Container\Exception\ContainerServNotFoundException;
 use Poirot\Container\Exception\SCInvokableCallException;
 use Poirot\Container\Exception\SCInvokablePluginNotFound;
 
-class InvokablePlugins
+class PluginsInvokable
 {
     /** @var AbstractPlugins */
     protected $plugins;

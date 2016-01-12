@@ -1,14 +1,14 @@
 <?php
 namespace Poirot\Container\Interfaces\Plugins;
 
-use Poirot\Container\Plugins\InvokablePlugins;
+use Poirot\Container\Plugins\PluginsInvokable;
 
 interface iInvokePluginsProvider
 {
     /**
      * Plugin Manager
      *
-     * @return InvokablePlugins
+     * @return PluginsInvokable
      */
     function plg();
 }
