@@ -10,7 +10,7 @@
         }
     ],
     "require": {
-        "poirot/core": "dev-master"
+        "poirot/std": "dev-master"
         , "poirot/loader": "dev-master"
     },
     "target-dir": "Poirot/Container",

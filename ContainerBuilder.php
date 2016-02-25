@@ -5,10 +5,9 @@ use Poirot\Container\Interfaces\iContainerBuilder;
 use Poirot\Container\Interfaces\iCService;
 use Poirot\Container\Interfaces\iCServiceInitializer;
 use Poirot\Container\Service\InstanceService;
-use Poirot\Core\AbstractOptions;
-use Poirot\Core\BuilderSetterTrait;
-use Poirot\Core\Interfaces\iBuilderSetter;
-use Poirot\Core\Interfaces\iPoirotOptions;
+use Poirot\Std\Interfaces\Struct\iDataStruct;
+use Poirot\Std\SetterBuilderTrait;
+use Poirot\Std\Interfaces\ipSetterBuilder;
 
 /**
 $container = new ContainerManager(new ContainerBuilder([
@@ -70,11 +69,11 @@ $container = new ContainerManager(new ContainerBuilder([
     ],
 ]));
  */
-class ContainerBuilder
+class ContainerBuilderBuilder
     implements iContainerBuilder
-    , iBuilderSetter
+    , ipSetterBuilder
 {
-    use BuilderSetterTrait;
+    use SetterBuilderTrait;
 
     protected $namespace;
 
@@ -152,7 +151,7 @@ class ContainerBuilder
         if (!empty($this->nested))
             foreach($this->nested as $namespace => $nest) {
                 if (is_array($nest))
-                    $nest = new Container(new ContainerBuilder($nest));
+                    $nest = new Container(new ContainerBuilderBuilder($nest));
 
                 if (!$nest instanceof Container)
                     throw new \InvalidArgumentException(sprintf(
@@ -209,7 +208,7 @@ class ContainerBuilder
                     $instance = new $class;
                 }
 
-                if ($instance instanceof iCService || $instance instanceof iPoirotOptions)
+                if ($instance instanceof iCService || $instance instanceof iDataStruct)
                     $instance->from($service);
 
                 if (!$instance instanceof iCService) {

@@ -1,6 +1,11 @@
 <?php
 namespace Poirot\Container\Plugins;
 
+use Poirot\ArgsResolver\ANamedResolver;
+use Poirot\Container\Exception\ContainerServNotFoundException;
+use Poirot\Container\Exception\SCInvokableCallException;
+use Poirot\Container\Exception\SCInvokablePluginNotFound;
+
 /*
 $invokablePlugins
     ->options([
@@ -9,10 +14,6 @@ $invokablePlugins
     ])
     ->callPlugin('arg1', 2);
 */
-use Poirot\ArgsResolver\ANamedResolver;
-use Poirot\Container\Exception\ContainerServNotFoundException;
-use Poirot\Container\Exception\SCInvokableCallException;
-use Poirot\Container\Exception\SCInvokablePluginNotFound;
 
 class PluginsInvokable
 {
@@ -58,10 +59,10 @@ class PluginsInvokable
             if (class_exists('\Poirot\ArgsResolver\ANamedResolver\ANamedResolver')) {
                 ## Resolve To Callback Arguments From Invoke Options
                 try {
-                    $argv = $this->__getArgsResolver()
-                        ->bind($plugin)
-                        ->resolve($argv)
-                            ->toArray();
+                    $argv = \Poirot\Std\iterator_to_array(
+                        $this->__getArgsResolver()->bind($plugin)
+                            ->resolve($argv)
+                    );
                 } catch(\Exception $e) { }
             }
 
@@ -103,7 +104,6 @@ class PluginsInvokable
     function options(array $options)
     {
         $this->options = $options;
-
         return $this;
     }
 

@@ -134,7 +134,7 @@ class Container implements iContainer
         if (!is_string($interface) && !interface_exists($interface))
             throw new \InvalidArgumentException(sprintf(
                 'Invalid interface arguments, this must be valid interface name or an object; given (%s).'
-                , \Poirot\Core\flatten($interface)
+                , \Poirot\Std\flatten($interface)
             ));
 
         $serviceName = $this->__canonicalizeName($serviceName);
@@ -205,7 +205,7 @@ class Container implements iContainer
     {
         $cName  = $this->__canonicalizeName($serviceName);
         ## hash with options, so we get unique service with different options V
-        $hashed = md5($cName.\Poirot\Core\flatten($invOpt));
+        $hashed = md5($cName.\Poirot\Std\flatten($invOpt));
 
         ## Service From Cache:
         if (!array_key_exists($hashed, $this->__shared)) { ### maybe null as result
@@ -247,7 +247,7 @@ class Container implements iContainer
         if ($flag == false)
             throw new \Exception(sprintf(
                 'Service with name (%s) must implement (%s); given: %s'
-                , $serviceName, $this->getInterfaceOf($serviceName), \Poirot\Core\flatten($instance)
+                , $serviceName, $this->getInterfaceOf($serviceName), \Poirot\Std\flatten($instance)
             ));
     }
 

@@ -85,7 +85,7 @@ class ContainerServiceInitializer implements iCServiceInitializer
             else
                 throw new \InvalidArgumentException(sprintf(
                     'Invalid Initializer Provided. (%s)'
-                    , \Poirot\Core\flatten($initializer)
+                    , \Poirot\Std\flatten($initializer)
                 ));
         }
     }

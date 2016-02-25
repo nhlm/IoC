@@ -5,7 +5,7 @@ use Poirot\Container\Interfaces\iContainer;
 use Poirot\Container\Interfaces\iCService;
 use Poirot\Container\Interfaces\Respec\iCServiceAware;
 use Poirot\Container\Interfaces\Respec\iCServiceProvider;
-use Poirot\Core\AbstractOptions;
+use Poirot\Std\Struct\AbstractOptionsData;
 
 /**
  * Note: Services Are Initialized On Container Manager
@@ -14,7 +14,7 @@ use Poirot\Core\AbstractOptions;
  *       Work On Service Objects.
  *
  */
-abstract class AbstractService extends AbstractOptions
+abstract class AbstractService extends AbstractOptionsData
     implements
     iCService,
     iCServiceAware,
@@ -63,7 +63,6 @@ abstract class AbstractService extends AbstractOptions
     function setName($name)
     {
         $this->name = (string) $name;
-
         return $this;
     }
 
@@ -87,7 +86,6 @@ abstract class AbstractService extends AbstractOptions
     function setAllowOverride($allow)
     {
         $this->allowOverride = (boolean) $allow;
-
         return $this;
     }
 

@@ -1,9 +1,9 @@
 <?php
 namespace Poirot\Container\Interfaces;
 
-use Poirot\Core\Interfaces\iPoirotOptions;
+use Poirot\Std\Interfaces\Struct\iOptionsData;
 
-interface iCService extends iPoirotOptions
+interface iCService extends iOptionsData
 {
     /**
      * Set Service Name

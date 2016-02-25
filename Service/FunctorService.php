@@ -81,7 +81,6 @@ class FunctorService extends AbstractService
     function setCallable(callable $func)
     {
         $this->callable = $func;
-
         return $this;
     }
 
@@ -106,10 +105,10 @@ class FunctorService extends AbstractService
         if (class_exists('\Poirot\ArgsResolver\ANamedResolver\ANamedResolver')) {
             ## Resolve To Callback Arguments From Invoke Options
             try {
-                $arguments = $this->__getArgsResolver()
-                    ->bind($callable)
-                    ->resolve($this->invoke_options)
-                        ->toArray();
+                $arguments = \Poirot\Std\iterator_to_array(
+                    $this->__getArgsResolver()->bind($callable)
+                        ->resolve($this->invoke_options)
+                );
             } catch(\Exception $e) { }
         }
 
