@@ -10,13 +10,23 @@
         }
     ],
     "require": {
-        "poirot/std": "dev-master"
-        , "poirot/loader": "dev-master"
+        "poirot/std": "dev-devel"
+        , "poirot/loader": "dev-devel"
     },
     "target-dir": "Poirot/Container",
     "autoload"  : {
         "psr-0": {
             "Poirot\\Container": "."
         }
-    }
+    },
+    "repositories": [
+      {
+        "type": "git",
+        "url": "https://github.com/phPoirot/Loader.git"
+      },
+      {
+        "type": "git",
+        "url": "https://github.com/phPoirot/Std.git"
+      }
+    ]
 }
