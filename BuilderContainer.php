@@ -6,6 +6,7 @@ use Poirot\Container\Interfaces\iContainerService;
 use Poirot\Container\Interfaces\iContainerInitializer;
 use Poirot\Container\Service\InstanceService;
 use Poirot\Std\ConfigurableSetter;
+use Poirot\Std\Interfaces\Struct\iData;
 
 /**
 $container = new ContainerManager(new ContainerBuilder([
@@ -98,110 +99,23 @@ class BuilderContainer
         // ORDER IS MANDATORY
 
         // Namespace:
-        if ($this->namespace)
-            $container->setNamespace($this->namespace);
+        $this->_buildNamespace($container);
 
         // Interfaces:
-        if ($this->implementations)
-            foreach ($this->implementations as $serviceName => $interface)
-                $container->setImplementation($serviceName, $interface);
+        $this->_buildImplementation($container);
 
         // Initializer:
-        // it become c`use maybe used on Services Creation
-        if (!empty($this->initializers))
-            foreach ($this->initializers as $priority => $initializer) {
-                if ($initializer instanceof iContainerInitializer)
-                    // [.. [ iInitializer, ...], ...]
-                    $priority = null;
-                elseif (is_array($initializer)) {
-                    // [ .. [ 10 => ['priority' => 10, 'initializer' => ...], ...]
-                    $priority    = (isset($initializer['priority'])) ? $initializer['priority'] : $priority;
-                    $initializer = (!isset($initializer['initializer'])) ?: $initializer['initializer'];
-                }
-
-                if (is_callable($initializer))
-                    $container->initializer()->addCallable($initializer, $priority);
-                elseif ($initializer instanceof iContainerInitializer)
-                    $container->initializer()->addInitializer(
-                        $initializer
-                        , ($priority === null) ? $initializer->getPriority() : $priority
-                    );
-            }
+        // maybe used while Creating Services
+        $this->_buildInitializer($container);
 
         // Nested:
-        if (!empty($this->nested))
-            foreach($this->nested as $namespace => $nest) {
-                if (is_array($nest))
-                    $nest = new Container(new BuilderContainer($nest));
-
-                if (!$nest instanceof Container)
-                    throw new \InvalidArgumentException(sprintf(
-                        '%s: Nested container must instanceof "ContainerManager" but "%s" given.'
-                        , $this->namespace, is_object($nest) ? get_class($nest) : gettype($nest)
-                    ));
-
-                if (!is_string($namespace))
-                    $namespace = $nest->getNamespace();
-
-                $container->nest($nest, $namespace);
-            }
+        $this->_buildNested($container);
 
         // Aliases:
-        if (!empty($this->aliases))
-            foreach($this->aliases as $alias => $srv)
-                $container->extend($alias, $srv);
+        $this->_buildAlias($container);
 
         // Service:
-        if (!empty($this->services))
-            foreach($this->services as $key => $service) {
-                if (is_string($key) && is_array($service))
-                {
-                    if (array_key_exists('_class_', $service)) {
-                    // *** [ 'service_name' => [ '_class_' => 'serviceClass', /* options */ ], ...]
-                    // ***
-                        $service['name'] = $key;
-                        $key             = $service['_class_'];
-                        unset($service['_class_']);
-                    }
-                    // *** else: [ 'serviceClass' => [ /* options */ ], ...]
-                    // ***
-                    if (!class_exists($key) && strstr($key, '\\') === false)
-                        // this is FactoryService style,
-                        // must prefixed with own namespace
-                        $key = '\\'.__NAMESPACE__.'\\Service\\'.$key;
-
-                    $class = $key;
-                } else
-                {
-                    // *** Looking For Class 'Path\To\Class'
-                    // ***
-                    $class   = $service;
-                    $name    = $key;
-                    $service = []; // service without options
-                }
-
-                if (is_object($class))
-                    $instance = $class;
-                else {
-                    if (!class_exists($class))
-                        throw new \Exception($this->namespace.": Service '$key' not found as Class Name.");
-
-                    $instance = new $class;
-                }
-
-                if ($instance instanceof iContainerService || $instance instanceof iDataStruct)
-                    $instance->from($service);
-
-                if (!$instance instanceof iContainerService) {
-                    if (!array_key_exists('name', $service) && !isset($name))
-                        throw new \InvalidArgumentException($this->namespace.": Service '$key' not recognized.");
-
-                    $name     = (isset($service['_name_'])) ? $service['_name_'] : $name;
-                    $instance = new InstanceService($name, $instance);
-                }
-
-                $container->set($instance);
-            }
+        $this->_buildService($container);
     }
 
 
@@ -258,6 +172,129 @@ class BuilderContainer
 
     // Options build action:
 
-    
+    protected function _buildNamespace(Container $container)
+    {
+        if ($this->namespace)
+            $container->setNamespace($this->namespace);
+    }
+
+    protected function _buildImplementation(Container $container)
+    {
+        if (!$this->implementations)
+            return;
+
+        foreach ($this->implementations as $serviceName => $interface)
+            $container->setImplementation($serviceName, $interface);
+    }
+
+    protected function _buildInitializer(Container $container)
+    {
+        if (empty($this->initializers))
+            return;
+
+        foreach ($this->initializers as $priority => $initializer) {
+            if ($initializer instanceof iContainerInitializer)
+                // [.. [ iInitializer, ...], ...]
+                $priority = null;
+            elseif (is_array($initializer)) {
+                // [ .. [ 10 => ['priority' => 10, 'initializer' => ...], ...]
+                $priority    = (isset($initializer['priority'])) ? $initializer['priority'] : $priority;
+                $initializer = (!isset($initializer['initializer'])) ?: $initializer['initializer'];
+            }
+
+            if (is_callable($initializer))
+                $container->initializer()->addCallable($initializer, $priority);
+            elseif ($initializer instanceof iContainerInitializer)
+                $container->initializer()->addInitializer(
+                    $initializer
+                    , ($priority === null) ? $initializer->getPriority() : $priority
+                );
+        }
+    }
+
+    protected function _buildNested(Container $container)
+    {
+        if (empty($this->nested))
+            return;
+
+        foreach($this->nested as $namespace => $nest) {
+            if (is_array($nest))
+                $nest = new Container(new BuilderContainer($nest));
+
+            
+            if (!is_string($namespace))
+                ## nested as options [options, ..]
+                $namespace = $nest->getNamespace();
+
+            $container->nest($nest, $namespace);
+        }
+    }
+
+    protected function _buildAlias(Container $container)
+    {
+        if (empty($this->aliases))
+            return;
+        
+        foreach($this->aliases as $alias => $srv)
+            $container->extend($alias, $srv);
+    }
+
+    /**
+     * @param Container $container
+     * @throws \Exception
+     */
+    private function _buildService(Container $container)
+    {
+        if (!empty($this->services))
+            foreach($this->services as $key => $service) {
+                if (is_string($key) && is_array($service))
+                {
+                    if (array_key_exists('_class_', $service)) {
+                        // *** [ 'service_name' => [ '_class_' => 'serviceClass', /* options */ ], ...]
+                        // ***
+                        $service['name'] = $key;
+                        $key             = $service['_class_'];
+                        unset($service['_class_']);
+                    }
+                    // *** else: [ 'serviceClass' => [ /* options */ ], ...]
+                    // ***
+                    if (!class_exists($key) && strstr($key, '\\') === false)
+                        // this is FactoryService style,
+                        // must prefixed with own namespace
+                        $key = '\\'.__NAMESPACE__.'\\Service\\'.$key;
+
+                    $class = $key;
+                } else
+                {
+                    // *** Looking For Class 'Path\To\Class'
+                    // ***
+                    $class   = $service;
+                    $name    = $key;
+                    $service = array(); // service without options
+                }
+
+                if (is_object($class))
+                    $instance = $class;
+                else {
+                    if (!class_exists($class))
+                        throw new \Exception($this->namespace.": Service '$key' not found as Class Name.");
+
+                    $instance = new $class;
+                }
+
+                if ($instance instanceof iContainerService || $instance instanceof iData)
+                    // TODO container options
+                    $instance->import($service);
+
+                if (!$instance instanceof iContainerService) {
+                    if (!array_key_exists('name', $service) && !isset($name))
+                        throw new \InvalidArgumentException($this->namespace.": Service '$key' not recognized.");
+
+                    $name     = (isset($service['_name_'])) ? $service['_name_'] : $name;
+                    $instance = new InstanceService($name, $instance);
+                }
+
+                $container->set($instance);
+            }
+    }
 }
- 
