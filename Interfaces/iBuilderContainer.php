@@ -1,7 +1,7 @@
 <?php
 namespace Poirot\Container\Interfaces;
 
-interface iContainerBuilder
+interface iBuilderContainer
 {
     /**
      * Configure container manager

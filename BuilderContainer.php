@@ -1,10 +1,11 @@
 <?php
 namespace Poirot\Container;
 
-use Poirot\Container\Interfaces\iContainerBuilder;
+use Poirot\Container\Interfaces\iBuilderContainer;
 use Poirot\Container\Interfaces\iContainerService;
 use Poirot\Container\Interfaces\iContainerInitializer;
 use Poirot\Container\Service\InstanceService;
+use Poirot\Std\ConfigurableSetter;
 
 /**
 $container = new ContainerManager(new ContainerBuilder([
@@ -66,34 +67,17 @@ $container = new ContainerManager(new ContainerBuilder([
     ],
 ]));
  */
-class ContainerBuilderBuilder
-    implements iContainerBuilder
-    , ipSetterBuilder
+class BuilderContainer
+    extends ConfigurableSetter
+    implements iBuilderContainer
 {
-    use SetterBuilderTrait;
-
     protected $namespace;
+    protected $services        = array();
+    protected $aliases         = array();
+    protected $initializers    = array();
+    protected $nested          = array();
+    protected $implementations = array();
 
-    protected $services     = [];
-
-    protected $aliases      = [];
-
-    protected $initializers = [];
-
-    protected $nested       = [];
-
-    protected $interfaces   = [];
-
-    /**
-     * Construct
-     *
-     * @param array $options
-     */
-    function __construct(array $options = [])
-    {
-        if (!empty($options))
-           $this->setupFromArray($options, true);
-    }
 
     /**
      * Configure container manager
@@ -118,9 +102,9 @@ class ContainerBuilderBuilder
             $container->setNamespace($this->namespace);
 
         // Interfaces:
-        if ($this->interfaces)
-            foreach ($this->interfaces as $serviceName => $interface)
-                $container->setInterface($serviceName, $interface);
+        if ($this->implementations)
+            foreach ($this->implementations as $serviceName => $interface)
+                $container->setImplementation($serviceName, $interface);
 
         // Initializer:
         // it become c`use maybe used on Services Creation
@@ -136,7 +120,7 @@ class ContainerBuilderBuilder
                 }
 
                 if (is_callable($initializer))
-                    $container->initializer()->addMethod($initializer, $priority);
+                    $container->initializer()->addCallable($initializer, $priority);
                 elseif ($initializer instanceof iContainerInitializer)
                     $container->initializer()->addInitializer(
                         $initializer
@@ -148,7 +132,7 @@ class ContainerBuilderBuilder
         if (!empty($this->nested))
             foreach($this->nested as $namespace => $nest) {
                 if (is_array($nest))
-                    $nest = new Container(new ContainerBuilderBuilder($nest));
+                    $nest = new Container(new BuilderContainer($nest));
 
                 if (!$nest instanceof Container)
                     throw new \InvalidArgumentException(sprintf(
@@ -232,11 +216,11 @@ class ContainerBuilderBuilder
     }
 
     /**
-     * @param array $interfaces
+     * @param array $implementations
      */
-    public function setInterfaces($interfaces)
+    public function setImplementations($implementations)
     {
-        $this->interfaces = $interfaces;
+        $this->implementations = $implementations;
     }
 
     /**
@@ -270,5 +254,10 @@ class ContainerBuilderBuilder
     {
         $this->nested = $nested;
     }
+
+
+    // Options build action:
+
+    
 }
  

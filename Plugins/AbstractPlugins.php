@@ -74,7 +74,7 @@ abstract class AbstractPlugins extends Container
             return;
 
 
-        $serviceName = $this->__canonicalizeName($serviceName);
+        $serviceName = $this->_normalizeServiceName($serviceName);
 
         ## maybe resolved as loader plugin
         if ($resolved = $this->resolver()->resolve($serviceName)) {

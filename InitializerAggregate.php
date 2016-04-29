@@ -1,11 +1,14 @@
 <?php
 namespace Poirot\Container;
 
+use SplPriorityQueue;
+
 use Poirot\Container\Interfaces\iContainerInitializer;
 
-class ContainerServiceInitializer 
+class InitializerAggregate
     implements iContainerInitializer
 {
+    /** @var SplPriorityQueue */
     protected $priorityQueue;
 
     /**
@@ -13,8 +16,8 @@ class ContainerServiceInitializer
      *
      * Methods will bind to service immediately:
      * [code]
-     * function() {
-     *  if ($this instanceof Application\ModuleAsService)
+     * function($instance) {
+     *  if ($instance instanceof Application\ModuleAsService)
      *      // do something
      * }
      * [/code]
@@ -27,13 +30,12 @@ class ContainerServiceInitializer
      *
      * @return $this
      */
-    function addMethod($methodCallable, $priority = 10)
+    function addCallable($methodCallable, $priority = 10)
     {
         if (!is_callable($methodCallable))
             throw new \InvalidArgumentException('Param must be callable');
 
-        $this->__getPriorityQueue()->insert($methodCallable, $priority);
-
+        $this->_getPriorityQueue()->insert($methodCallable, $priority);
         return $this;
     }
 
@@ -52,43 +54,43 @@ class ContainerServiceInitializer
             ? ( ($initializer->getPriority() !== null) ? $initializer->getPriority() : 10)
             : $priority;
 
-        $this->__getPriorityQueue()->insert($initializer, $priority);
-
+        $this->_getPriorityQueue()->insert($initializer, $priority);
         return $this;
     }
 
     /**
      * Initialize Service
      *
-     * @param mixed $service Service
+     * @param mixed $instance Service
      *
      * @return mixed
      */
-    function initialize($service)
+    function initialize($instance)
     {
-        foreach(clone $this->__getPriorityQueue() as $initializer)
+        foreach(clone $this->_getPriorityQueue() as $initializer)
         {
-            // TODO: Handle Exception Retrieval
-
-            if ($initializer instanceof \Closure) {
-                /** @var \Closure $initializer */
-                if (is_object($service)) {
-                    // Bind Initializer within service
-                    $initializer = $initializer->bindTo($service);
-                    $initializer();
-                } else {
-                    // initializer($service)
-                    call_user_func_array($initializer, [&$service]);
-                }
-            }
-            elseif ($initializer instanceof iContainerInitializer)
-                $initializer->initialize($service);
-            else
+            if (!is_callable($initializer) && !$initializer instanceof iContainerInitializer)
                 throw new \InvalidArgumentException(sprintf(
-                    'Invalid Initializer Provided. (%s)'
+                    'Invalid Initializer Provided. (%s).'
                     , \Poirot\Std\flatten($initializer)
                 ));
+
+            if ($initializer instanceof iContainerInitializer)
+                $initializer->initialize($instance);
+            else /* Callable */
+                $this->_initializeCallable($initializer, $instance);
         }
+    }
+
+    protected function _initializeCallable($initializer, $instance)
+    {
+        if ($initializer instanceof \Closure)
+            // DO_LEAST_PHPVER_SUPPORT 5.4 closure bindto
+            if (is_object($instance) && version_compare(phpversion(), '5.4.0') >= 0)
+                // Bind Initializer within service
+                $initializer = $initializer->bindTo($instance);
+
+        call_user_func($initializer, $instance);
     }
 
     /**
@@ -101,15 +103,18 @@ class ContainerServiceInitializer
         return 0;
     }
 
+
+    // ...
+
     /**
      * internal priority queue
      *
-     * @return \SplPriorityQueue
+     * @return SplPriorityQueue
      */
-    protected function __getPriorityQueue()
+    protected function _getPriorityQueue()
     {
         if (!$this->priorityQueue)
-            $this->priorityQueue = new \SplPriorityQueue();
+            $this->priorityQueue = new SplPriorityQueue();
 
         return $this->priorityQueue;
     }
