@@ -9,9 +9,8 @@ interface iContainer
     /**
      * Retrieve a registered service
      *
-     * - don't refresh retrieve for services, store-
-     *   service on first request
-     * - if service not exists ::fresh it
+     * !! create service of first retrieve and store it.
+     *    if service not exists self::fresh will call. 
      *
      * @param string $serviceName Service name
      * @param array  $invOpt      Invoke Options
@@ -19,7 +18,7 @@ interface iContainer
      * @throws ContainerCreateServiceException|ContainerServNotFoundException
      * @return mixed
      */
-    function get($serviceName, $invOpt = []);
+    function get($serviceName, $invOpt = array());
 
     /**
      * Retrieve a fresh instance of service
@@ -30,7 +29,7 @@ interface iContainer
      * @throws ContainerCreateServiceException|ContainerServNotFoundException
      * @return mixed
      */
-    function fresh($serviceName, $invOpt = []);
+    function fresh($serviceName, $invOpt = array());
 
     /**
      * Check for a registered instance

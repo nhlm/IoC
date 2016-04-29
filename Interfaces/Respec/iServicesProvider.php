@@ -3,7 +3,7 @@ namespace Poirot\Container\Interfaces\Respec;
 
 use Poirot\Container\Interfaces\iContainer;
 
-interface iCServiceProvider
+interface iServicesProvider
 {
     /**
      * Services Container

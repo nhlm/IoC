@@ -10,12 +10,12 @@ use Poirot\Container\Interfaces\iContainer;
  *   can have parent Service Container injected
  *
  */
-interface iCServiceAware 
+interface iServicesAware 
 {
     /**
      * Set Service Container
      *
      * @param iContainer $container
      */
-    function setServiceContainer(iContainer $container);
+    function setServices(iContainer $container);
 }

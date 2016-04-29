@@ -1,7 +1,7 @@
 <?php
 namespace Poirot\Container\Interfaces;
 
-interface iCServiceInitializer
+interface iContainerInitializer
 {
     /**
      * Initialize Service
@@ -17,5 +17,5 @@ interface iCServiceInitializer
      *
      * @return int
      */
-    function getDefPriority();
+    function getPriority();
 }

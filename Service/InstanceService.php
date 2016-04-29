@@ -1,7 +1,8 @@
 <?php
 namespace Poirot\Container\Service;
 
-class InstanceService extends AbstractService
+class InstanceService 
+    extends aContainerService
 {
     protected $service;
 

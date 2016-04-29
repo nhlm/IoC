@@ -2,12 +2,9 @@
 namespace Poirot\Container;
 
 use Poirot\Container\Interfaces\iContainerBuilder;
-use Poirot\Container\Interfaces\iCService;
-use Poirot\Container\Interfaces\iCServiceInitializer;
+use Poirot\Container\Interfaces\iContainerService;
+use Poirot\Container\Interfaces\iContainerInitializer;
 use Poirot\Container\Service\InstanceService;
-use Poirot\Std\Interfaces\Struct\iDataStruct;
-use Poirot\Std\SetterBuilderTrait;
-use Poirot\Std\Interfaces\ipSetterBuilder;
 
 /**
 $container = new ContainerManager(new ContainerBuilder([
@@ -129,7 +126,7 @@ class ContainerBuilderBuilder
         // it become c`use maybe used on Services Creation
         if (!empty($this->initializers))
             foreach ($this->initializers as $priority => $initializer) {
-                if ($initializer instanceof iCServiceInitializer)
+                if ($initializer instanceof iContainerInitializer)
                     // [.. [ iInitializer, ...], ...]
                     $priority = null;
                 elseif (is_array($initializer)) {
@@ -140,10 +137,10 @@ class ContainerBuilderBuilder
 
                 if (is_callable($initializer))
                     $container->initializer()->addMethod($initializer, $priority);
-                elseif ($initializer instanceof iCServiceInitializer)
+                elseif ($initializer instanceof iContainerInitializer)
                     $container->initializer()->addInitializer(
                         $initializer
-                        , ($priority === null) ? $initializer->getDefPriority() : $priority
+                        , ($priority === null) ? $initializer->getPriority() : $priority
                     );
             }
 
@@ -208,10 +205,10 @@ class ContainerBuilderBuilder
                     $instance = new $class;
                 }
 
-                if ($instance instanceof iCService || $instance instanceof iDataStruct)
+                if ($instance instanceof iContainerService || $instance instanceof iDataStruct)
                     $instance->from($service);
 
-                if (!$instance instanceof iCService) {
+                if (!$instance instanceof iContainerService) {
                     if (!array_key_exists('name', $service) && !isset($name))
                         throw new \InvalidArgumentException($this->namespace.": Service '$key' not recognized.");
 

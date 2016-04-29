@@ -3,7 +3,7 @@ namespace Poirot\Container\Plugins;
 
 use Poirot\Container\Container;
 use Poirot\Container\Exception\ContainerInvalidPluginException;
-use Poirot\Container\Interfaces\iCService;
+use Poirot\Container\Interfaces\iContainerService;
 use Poirot\Container\Service\InstanceService;
 use Poirot\Loader\Interfaces\iLoader;
 use Poirot\Loader\Interfaces\iLoaderProvider;
@@ -89,7 +89,7 @@ abstract class AbstractPlugins extends Container
                 $service = new $resolved();
             }
 
-            if (!$service instanceof iCService)
+            if (!$service instanceof iContainerService)
                 $service = new InstanceService($serviceName, $service);
 
             ### set service so be can retrieved later

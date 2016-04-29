@@ -3,9 +3,9 @@ namespace Poirot\Container;
 
 use Poirot\Container\Interfaces\iContainer;
 use Poirot\Container\Interfaces\iContainerBuilder;
-use Poirot\Container\Interfaces\iCService;
-use Poirot\Container\Interfaces\Respec\iCServiceAware;
-use Poirot\Container\Service\AbstractService;
+use Poirot\Container\Interfaces\iContainerService;
+use Poirot\Container\Interfaces\Respec\iServicesAware;
+use Poirot\Container\Service\aContainerService;
 
 class Container implements iContainer
 {
@@ -164,12 +164,12 @@ class Container implements iContainer
     /**
      * Register a service to container
      *
-     * @param iCService $service Service
+     * @param iContainerService $service Service
      *
      * @throws \Exception
      * @return $this
      */
-    function set(iCService $service)
+    function set(iContainerService $service)
     {
         $name  = $service->getName();
 
@@ -289,7 +289,7 @@ class Container implements iContainer
         # attain service instance ...................................................................\
         $cName = $this->__canonicalizeName($serviceName);
 
-        /** @var iCService $inService */
+        /** @var iContainerService $inService */
         $inService = $this->services[$cName];
 
         # Refresh Service:
@@ -385,16 +385,16 @@ class Container implements iContainer
             // ---- So, $this referee to those service object
             $thisContainer = $this;
             $this->initializer->addMethod(function() use ($thisContainer) {
-                if ($this instanceof iCServiceAware)
+                if ($this instanceof iServicesAware)
                     // Inject Service Container Inside
-                    $this->setServiceContainer($thisContainer);
+                    $this->setServices($thisContainer);
             }, 10000);
 
             // Inject Invoke Parameters into service to build:
             $self = $this;
             $this->initializer->addMethod(function() use ($self) {
-                if ($this instanceof iCService) {
-                    /** @var AbstractService $this */
+                if ($this instanceof iContainerService) {
+                    /** @var aContainerService $this */
                     $this->invoke_options = $self->__invokeOptions;
                 }
             }, 10000);
