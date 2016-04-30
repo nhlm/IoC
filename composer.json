@@ -1,5 +1,5 @@
 {
-    "name": "poirot/container",
+    "name": "poirot/ioc",
     "description": "Service Manager Container.",
     "type"       : "library",
     "authors": [
@@ -13,10 +13,10 @@
         "poirot/std": "dev-devel"
         , "poirot/loader": "dev-devel"
     },
-    "target-dir": "Poirot/Container",
+    "target-dir": "Poirot/Ioc",
     "autoload"  : {
         "psr-0": {
-            "Poirot\\Container": "."
+            "Poirot\\Ioc": "."
         }
     },
     "repositories": [
