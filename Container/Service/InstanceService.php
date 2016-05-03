@@ -14,18 +14,18 @@ class InstanceService
      * or setter set
      * - new InstanceService([ 'service' => [..] ..options])
      *
-     * @param array|callable $options
-     * @param null|string    $service
+     * @param array|callable $nameOrSetter
+     * @param null|string    $setter
      */
-    function __construct($options = null, $service = null)
+    function __construct($nameOrSetter = null, $setter = null)
     {
-        if (is_string($options)) {
+        if (is_string($nameOrSetter)) {
             ## __construct('name', [$this, 'method'])
-            $this->setName($options);
-            $this->setService($service);
+            $this->setName($nameOrSetter);
+            $this->setService($setter);
         }
         
-        parent::__construct($options);
+        parent::__construct($nameOrSetter);
     }
 
     /**

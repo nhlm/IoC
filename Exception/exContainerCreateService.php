@@ -1,5 +1,5 @@
 <?php
-namespace Poirot\Container\Exception;
+namespace Poirot\Ioc\Exception;
 
 class exContainerCreateService 
     extends \RuntimeException

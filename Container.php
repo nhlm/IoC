@@ -1,8 +1,6 @@
 <?php
 namespace Poirot\Ioc;
 
-use Poirot\Container\Exception\exContainerCreateService;
-use Poirot\Container\Exception\exContainerNoService;
 use Poirot\Std\ErrorStack;
 
 use Poirot\Ioc\Interfaces\iContainer;
@@ -11,6 +9,8 @@ use Poirot\Ioc\Container\Interfaces\iContainerService;
 
 use Poirot\Ioc\Container\BuilderContainer;
 use Poirot\Ioc\Container\InitializerAggregate;
+use Poirot\Ioc\Exception\exContainerCreateService;
+use Poirot\Ioc\Exception\exContainerNoService;
 
 class Container
     implements iContainer
@@ -178,7 +178,10 @@ class Container
 
     /**
      * Retrieve a registered service
-     *
+     * 
+     * !! get always cache the last result of created service
+     *    with same options; otherwise using ::fresh instead
+     * 
      * !! create service of first retrieve and store it.
      *    if service not exists self::fresh will call.
      *
@@ -262,6 +265,8 @@ class Container
             $inService = clone $inService;
             $inService->optsData()->import($invOpt);
             $instance = $this->_createFromService($inService);
+            if ($instance === null)
+                throw new \Exception('service meanwhile found create nothing(null).');
         }
         catch(\Exception $e) {
             throw new exContainerCreateService(sprintf(
@@ -512,7 +517,7 @@ class Container
      */
     protected function _validateImplementation($serviceName, $instance)
     {
-        if ($implement = $this->hasImplementation($serviceName))
+        if (false === $implement = $this->hasImplementation($serviceName))
             ## we have not defined implementation, nothing to do
             return;
 

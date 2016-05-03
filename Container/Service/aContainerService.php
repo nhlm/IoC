@@ -50,7 +50,9 @@ abstract class aContainerService
      *   new Service('serviceName', ['allow_override' => false])
      *   new Service(['name' => 'serviceName', 'allow_override' => false])
      * [code]
-     *
+     * 
+     * @param string|array $nameOsetter Service name Or Setter Options
+     * @param array        $setter      Setter Options
      */
     function __construct($nameOsetter, array $setter = array())
     {

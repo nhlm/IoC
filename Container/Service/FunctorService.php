@@ -50,22 +50,21 @@ class FunctorService
      *
      * also can used as:
      * - new FunctorService('name', function() {});
+     * - new FunctorService('name', ['callable' => .. ..options]);
      * or setter set
      * - new FunctorService([ 'callable' => [..] ..options])
      *
-     * @param array|callable $options
-     * @param null|string    $service
+     * @param array|callable $nameOrSetter
+     * @param null|string    $setter
      */
-    function __construct($options = null, $service = null)
+    function __construct($nameOrSetter = array(), $setter = null)
     {
-        if (is_callable($service)) {
-            ## __construct('name', [$this, 'method'])
-            $this->setCallable($service);
-            $this->setName($options);
+        if (is_string($nameOrSetter) && is_callable($setter)) {
+            ## new FunctorService('name', function() {})
+            $setter = array('callable' => $setter);
         }
-        else
-            ## ['callable' => '..', ..]
-            parent::__construct($options);
+        
+        parent::__construct($nameOrSetter, $setter);
     }
 
     /**
@@ -75,13 +74,19 @@ class FunctorService
      *   so, you can access to methods from FunctorService
      *   from function() { $this->getServiceContainer() }
      *
-     * @param callable $func
+     * @param callable $callable
      *
      * @return $this
      */
-    function setCallable(callable $func)
+    function setCallable(/*callable*/$callable)
     {
-        $this->callable = $func;
+        if (!is_callable($callable))
+            throw new \InvalidArgumentException(sprintf(
+                'Given argument must be a callable. given: %s'
+                , \Poirot\Std\flatten($callable)
+            ));
+        
+        $this->callable = $callable;
         return $this;
     }
 
@@ -93,26 +98,27 @@ class FunctorService
     function createService()
     {
         $callable = $this->callable;
-        if ($callable instanceof \Closure)
+        if ($callable === null)
+            ## no callable provided but rather not throw exception
+            return;
+        
+        // ..
+        // DO_LEAST_PHPVER_SUPPORT 5.4 Closure Bind
+        if ($callable instanceof \Closure && version_compare(phpversion(), '5.4.0') > 0)
             $callable = $callable->bindTo($this);
 
-        if (!is_array($this->invoke_options))
-            $this->invoke_options = [$this->invoke_options];
-
         // ...
-
-        $arguments = $this->invoke_options;
-
+        $arguments = $this->optsData();
+        
         if (class_exists('\Poirot\ArgsResolver\ANamedResolver\ANamedResolver')) {
             ## Resolve To Callback Arguments From Invoke Options
             try {
-                $arguments = \Poirot\Std\cast(
-                    $this->__getArgsResolver()->bind($callable)
-                        ->resolve($this->invoke_options)
-                );
+                $arguments = $this->__getArgsResolver()->bind($callable)
+                    ->resolve($arguments);
             } catch(\Exception $e) { }
         }
-
+        
+        $arguments = \Poirot\Std\cast($arguments);
         return call_user_func_array($callable, $arguments->toArray());
     }
 
