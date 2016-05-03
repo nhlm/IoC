@@ -1,16 +1,14 @@
 <?php
-namespace Poirot\Container;
+namespace Poirot\Ioc\Container;
 
-use Poirot\Container\Interfaces\iBuilderContainer;
-use Poirot\Container\Interfaces\iContainerService;
-use Poirot\Container\Interfaces\iContainerInitializer;
-use Poirot\Container\Service\InstanceService;
 use Poirot\Std\ConfigurableSetter;
 use Poirot\Std\Interfaces\Struct\iData;
+use Poirot\Ioc\Container;
+use Poirot\Ioc\Container\Service\InstanceService;
+use Poirot\Ioc\Container\Interfaces\iContainerInitializer;
+use Poirot\Ioc\Container\Interfaces\iContainerService;
 
 /**
-$container = new ContainerManager(new ContainerBuilder([
-    'namespace' => 'sysdir',
     'services'   => [
         new FactoryService(['name' => 'sysdir',
             'delegate' => function() {
@@ -49,37 +47,26 @@ $container = new ContainerManager(new ContainerBuilder([
  *      'ClassName' => ['_name_' => 'serviceName', 'option' => 'value' ],
  *
     ],
-    'aliases' => [
-        'alias' => 'service',
-    ],
-    'initializers' => [
-        // $priority => callable,
-        // iInitializer,
-        // $priority => [ // here
-        //    'priority'    => 10, // or here
-        //    'initializer' => callable | iInitializer, // iInitializer priority will override
-        // ],
-    ],
-    'nested' => [
-        // 'namespace' => new ContainerManager() # or instance,
-        // 'namespace' => $builderArrayOption, # like this
-        // $builderArrayOption, # like this
-        // new ContainerManager() #or instance
-    ],
-]));
  */
 class BuilderContainer
     extends ConfigurableSetter
-    implements iBuilderContainer
 {
     protected $namespace;
     protected $services        = array();
-    protected $aliases         = array();
+    protected $extends         = array();
     protected $initializers    = array();
     protected $nested          = array();
     protected $implementations = array();
 
-
+    /**
+     * @override Force to throw Exception on invalid Options
+     * @inheritdoc
+     */
+    function with(array $options, $throwException = true)
+    {
+        parent::with($options, $throwException);
+    }
+    
     /**
      * Configure container manager
      *
@@ -88,7 +75,7 @@ class BuilderContainer
      * @throws \Exception
      * @return void
      */
-    function build(/*Container*/ $container)
+    function build(Container $container)
     {
         if (!$container instanceof Container)
             throw new \Exception(sprintf(
@@ -112,7 +99,7 @@ class BuilderContainer
         $this->_buildNested($container);
 
         // Aliases:
-        $this->_buildAlias($container);
+        $this->_buildExtend($container);
 
         // Service:
         $this->_buildService($container);
@@ -122,19 +109,26 @@ class BuilderContainer
     // Setter Methods
 
     /**
+     * 'namespace' => 'sysdir'
+     *
      * @param string $namespace
      */
     public function setNamespace($namespace)
     {
-        $this->namespace = $namespace;
+        $this->namespace = (string) $namespace;
     }
 
     /**
-     * @param array $implementations
+     * 'implementations' => [
+     *    'log'     => Poirot\Logger\Interfaces\iLogger::class, // interface
+     *    'logs'    => Poirot\Logger\Logs::class,               // class name
+     *    'modules' => new P\Ioc\Container                      // class object
+     *
+     * @param array $options
      */
-    public function setImplementations($implementations)
+    public function setImplementations($options)
     {
-        $this->implementations = $implementations;
+        $this->implementations = $options;
     }
 
     /**
@@ -146,27 +140,45 @@ class BuilderContainer
     }
 
     /**
-     * @param array $aliases
+     * 'extends' => [
+     *    'newName' => 'serviceOrAlias',
+     *
+     * @param array $options
      */
-    public function setAliases($aliases)
+    public function setExtends($options)
     {
-        $this->aliases = $aliases;
+        $this->extends = $options;
     }
 
     /**
-     * @param array $initializers
+     * 'initializers' => [
+     *    $priority => callable,
+     *    iInitializer,
+     *    [
+     *       'priority'    => 10,
+     *       'initializer' => callable | iInitializer, // iInitializer priority will override
+     *    ]
+     *
+     * @param array $options
      */
-    public function setInitializers($initializers)
+    public function setInitializers($options)
     {
-        $this->initializers = $initializers;
+        $this->initializers = $options;
     }
 
     /**
-     * @param array $nested
+     * 'nested' => [
+     *    'namespace' => new ContainerManager,
+     *     new ContainerManager()
+     *
+     *    'namespace' => $builderArrayOption, // container builder option
+     *    $builderArrayOption,                // container builder option
+     *
+     * @param array $options
      */
-    public function setNested($nested)
+    public function setNested($options)
     {
-        $this->nested = $nested;
+        $this->nested = $options;
     }
 
 
@@ -230,13 +242,10 @@ class BuilderContainer
         }
     }
 
-    protected function _buildAlias(Container $container)
+    protected function _buildExtend(Container $container)
     {
-        if (empty($this->aliases))
-            return;
-        
-        foreach($this->aliases as $alias => $srv)
-            $container->extend($alias, $srv);
+        foreach($this->extends as $newName => $serviceOrAlias)
+            $container->extend($newName, $serviceOrAlias);
     }
 
     /**

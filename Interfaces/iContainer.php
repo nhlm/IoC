@@ -1,8 +1,8 @@
 <?php
-namespace Poirot\Container\Interfaces;
+namespace Poirot\Ioc\Interfaces;
 
-use Poirot\Container\Exception\ContainerCreateServiceException;
-use Poirot\Container\Exception\ContainerServNotFoundException;
+use Poirot\Container\Exception\exContainerCreateService;
+use Poirot\Container\Exception\exContainerNoService;
 
 interface iContainer
 {
@@ -15,7 +15,7 @@ interface iContainer
      * @param string $serviceName Service name
      * @param array  $invOpt      Invoke Options
      *
-     * @throws ContainerCreateServiceException|ContainerServNotFoundException
+     * @throws exContainerCreateService|exContainerNoService
      * @return mixed
      */
     function get($serviceName, $invOpt = array());
@@ -26,7 +26,7 @@ interface iContainer
      * @param string $serviceName Service name
      * @param array  $invOpt      Invoke Options
      *
-     * @throws ContainerCreateServiceException|ContainerServNotFoundException
+     * @throws exContainerCreateService|exContainerNoService
      * @return mixed
      */
     function fresh($serviceName, $invOpt = array());

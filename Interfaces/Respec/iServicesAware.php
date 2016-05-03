@@ -1,7 +1,7 @@
 <?php
-namespace Poirot\Container\Interfaces\Respec;
+namespace Poirot\Ioc\Interfaces\Respec;
 
-use Poirot\Container\Interfaces\iContainer;
+use Poirot\Ioc\Interfaces\iContainer;
 
 /**
  * Interface iCServiceAware

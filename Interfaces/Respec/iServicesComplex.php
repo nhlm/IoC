@@ -1,5 +1,5 @@
 <?php
-namespace Poirot\Container\Interfaces\Respec;
+namespace Poirot\Ioc\Interfaces\Respec;
 
 interface iServicesComplex 
     extends iServicesAware

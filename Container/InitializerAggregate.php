@@ -1,9 +1,8 @@
 <?php
-namespace Poirot\Container;
+namespace Poirot\Ioc\Container;
 
 use SplPriorityQueue;
-
-use Poirot\Container\Interfaces\iContainerInitializer;
+use Poirot\Ioc\Container\Interfaces\iContainerInitializer;
 
 class InitializerAggregate
     implements iContainerInitializer

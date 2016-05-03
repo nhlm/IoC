@@ -1,13 +1,14 @@
 <?php
-namespace Poirot\Container\Service;
+namespace Poirot\Ioc\Container\Service;
 
 use Poirot\Std\ConfigurableSetter;
-use Poirot\Std\Interfaces\Struct\iDataOptions;
 use Poirot\Std\Struct\aDataOptions;
-use Poirot\Container\Interfaces\iContainer;
-use Poirot\Container\Interfaces\iContainerService;
-use Poirot\Container\Interfaces\Respec\iServicesComplex;
 use Poirot\Std\Struct\DataOptionsOpen;
+use Poirot\Std\Interfaces\Struct\iDataOptions;
+use Poirot\Ioc\Container;
+use Poirot\Ioc\Interfaces\iContainer;
+use Poirot\Ioc\Interfaces\Respec\iServicesComplex;
+use Poirot\Ioc\Container\Interfaces\iContainerService;
 
 abstract class aContainerService
     extends    ConfigurableSetter
@@ -37,7 +38,7 @@ abstract class aContainerService
 
     /**
      * implement iCServiceAware
-     * @var iContainer Injected Container
+     * @var Container Injected Container
      */
     protected $sc;
 

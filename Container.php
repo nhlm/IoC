@@ -1,11 +1,16 @@
 <?php
-namespace Poirot\Container;
+namespace Poirot\Ioc;
 
+use Poirot\Container\Exception\exContainerCreateService;
+use Poirot\Container\Exception\exContainerNoService;
 use Poirot\Std\ErrorStack;
-use Poirot\Container\Interfaces\iContainer;
-use Poirot\Container\Interfaces\iBuilderContainer;
-use Poirot\Container\Interfaces\iContainerService;
-use Poirot\Container\Interfaces\Respec\iServicesAware;
+
+use Poirot\Ioc\Interfaces\iContainer;
+use Poirot\Ioc\Interfaces\Respec\iServicesAware;
+use Poirot\Ioc\Container\Interfaces\iContainerService;
+
+use Poirot\Ioc\Container\BuilderContainer;
+use Poirot\Ioc\Container\InitializerAggregate;
 
 class Container
     implements iContainer
@@ -48,11 +53,11 @@ class Container
     /**
      * Construct
      *
-     * @param iBuilderContainer $cBuilder
+     * @param BuilderContainer $cBuilder
      *
      * @throws \Exception
      */
-    function __construct(iBuilderContainer $cBuilder = null)
+    function __construct(BuilderContainer $cBuilder = null)
     {
         if ($cBuilder !== null)
             $cBuilder->build($this);
@@ -86,7 +91,7 @@ class Container
     // Service Manager:
 
     /**
-     * Set Service Implementation Interface
+     * Set Service Implementation Interface Contract
      *
      * $implement:
      *  - string '\InterfaceName'
@@ -120,7 +125,7 @@ class Container
     }
 
     /**
-     * Get Implementation Interface of Service
+     * Get Implementation Interface of Service Contract
      *
      * @param string $serviceName
      *
@@ -236,7 +241,7 @@ class Container
         // ..
 
         if (!$this->has($serviceName))
-            throw new Exception\ContainerServNotFoundException(sprintf(
+            throw new exContainerNoService(sprintf(
                 '%s (%s) was requested but no service could be found.'
                 , ($serviceName !== $orgName)
                     ? "Service ($serviceName) with alias"
@@ -259,7 +264,7 @@ class Container
             $instance = $this->_createFromService($inService);
         }
         catch(\Exception $e) {
-            throw new Exception\ContainerCreateServiceException(sprintf(
+            throw new exContainerCreateService(sprintf(
                 'An exception was raised while creating (%s); no instance returned.'
                 , $orgName
             ), $e->getCode(), $e);

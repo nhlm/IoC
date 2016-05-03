@@ -1,5 +1,5 @@
 <?php
-namespace Poirot\Container\Service;
+namespace Poirot\Ioc\Container\Service;
 
 use Poirot\ArgsResolver\ANamedResolver;
 
@@ -29,7 +29,8 @@ use Poirot\ArgsResolver\ANamedResolver;
  *
  */
 
-class FunctorService extends aContainerService
+class FunctorService 
+    extends aContainerService
 {
     /**
      * Function Arguments as a Container::get arg. options
@@ -105,18 +106,18 @@ class FunctorService extends aContainerService
         if (class_exists('\Poirot\ArgsResolver\ANamedResolver\ANamedResolver')) {
             ## Resolve To Callback Arguments From Invoke Options
             try {
-                $arguments = \Poirot\Std\iterator_to_array(
+                $arguments = \Poirot\Std\cast(
                     $this->__getArgsResolver()->bind($callable)
                         ->resolve($this->invoke_options)
                 );
             } catch(\Exception $e) { }
         }
 
-        return call_user_func_array($callable, $arguments);
+        return call_user_func_array($callable, $arguments->toArray());
     }
 
-        protected function __getArgsResolver()
-        {
-            return new ANamedResolver;
-        }
+    protected function __getArgsResolver()
+    {
+        return new ANamedResolver;
+    }
 }

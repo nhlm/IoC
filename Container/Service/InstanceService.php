@@ -1,5 +1,5 @@
 <?php
-namespace Poirot\Container\Service;
+namespace Poirot\Ioc\Container\Service;
 
 class InstanceService 
     extends aContainerService
@@ -19,15 +19,13 @@ class InstanceService
      */
     function __construct($options = null, $service = null)
     {
-        if (is_array($options)) {
-            ## ['callable' => '..', ..]
-            $this->from($options);
-        }
-        elseif (is_string($options)) {
+        if (is_string($options)) {
             ## __construct('name', [$this, 'method'])
             $this->setName($options);
             $this->setService($service);
         }
+        
+        parent::__construct($options);
     }
 
     /**

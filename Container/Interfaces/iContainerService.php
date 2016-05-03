@@ -1,5 +1,5 @@
 <?php
-namespace Poirot\Container\Interfaces;
+namespace Poirot\Ioc\Container\Interfaces;
 
 use Poirot\Std\Interfaces\Pact\ipOptionsProvider;
 

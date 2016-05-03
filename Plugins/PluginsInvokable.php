@@ -2,9 +2,9 @@
 namespace Poirot\Container\Plugins;
 
 use Poirot\ArgsResolver\ANamedResolver;
-use Poirot\Container\Exception\ContainerServNotFoundException;
+use Poirot\Container\Exception\exContainerNoService;
 use Poirot\Container\Exception\SCInvokableCallException;
-use Poirot\Container\Exception\SCInvokablePluginNotFound;
+use Poirot\Container\Exception\SCInvokablePluginNotFoundEx;
 
 /*
 $invokablePlugins
@@ -50,9 +50,9 @@ class PluginsInvokable
         try {
             $options = ($this->options) ? $this->options : [];
             $plugin = $this->plugins->get($method, $options);
-        } catch (ContainerServNotFoundException $e) {
+        } catch (exContainerNoService $e) {
             ## service not found
-            throw new SCInvokablePluginNotFound("Invokable Method ({$method}) not found as a plugin.", null , $e);
+            throw new SCInvokablePluginNotFoundEx("Invokable Method ({$method}) not found as a plugin.", null , $e);
         }
 
         if (is_callable($plugin)) {
