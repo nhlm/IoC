@@ -74,7 +74,7 @@ class Container
      */
     function setNamespace($namespace)
     {
-        $this->namespace = $this->_normalizeServiceName($namespace);
+        $this->namespace = $this->_normalizeName($namespace);
         return $this;
     }
 
@@ -120,7 +120,7 @@ class Container
         if (is_object($implement))
             $implement = get_class($implement);
 
-        $serviceName = $this->_normalizeServiceName($serviceName);
+        $serviceName = $this->_normalizeName($serviceName);
         $this->implementations[$serviceName] = $implement;
         return $this;
     }
@@ -134,7 +134,7 @@ class Container
      */
     function hasImplementation($serviceName)
     {
-        $serviceName = $this->_normalizeServiceName($serviceName);
+        $serviceName = $this->_normalizeName($serviceName);
 
         return (
             isset($this->implementations[$serviceName])
@@ -160,7 +160,7 @@ class Container
             $service->delegate($this);
         
         $name  = $service->getName();
-        $cName = $this->_normalizeServiceName($name);
+        $cName = $this->_normalizeName($name);
         if ($this->has($name) && !$this->services[$cName]->isAllowOverride())
             throw new \Exception(
                 "A service by the name or alias ({$name}) already exists and cannot be overridden;"
@@ -179,7 +179,7 @@ class Container
      */
     function has($serviceName)
     {
-        $cName = $this->_normalizeServiceName($serviceName);
+        $cName = $this->_normalizeName($serviceName);
         return isset($this->services[$cName]);
     }
 
@@ -200,7 +200,7 @@ class Container
      */
     function get($serviceName, $invOpt = array())
     {
-        $cName  = $this->_normalizeServiceName($serviceName);
+        $cName  = $this->_normalizeName($serviceName);
         ## hash with options, so we get unique service with different options V
         $hashed = md5($cName.\Poirot\Std\flatten($invOpt));
 
@@ -261,7 +261,7 @@ class Container
 
 
         # attain service instance ...................................................................\
-        $cName = $this->_normalizeServiceName($serviceName);
+        $cName = $this->_normalizeName($serviceName);
         /** @var iContainerService $inService */
         $inService = $this->services[$cName];
 
@@ -299,7 +299,7 @@ class Container
     function getExtended($serviceName)
     {
         while ($this->_hasExtendAliases($serviceName)) {
-            $cAlias = $this->_normalizeServiceName($serviceName);
+            $cAlias = $this->_normalizeName($serviceName);
             $serviceName  = $this->aliases[$cAlias];
             ## check if we have alias to nested service
             if (strpos($serviceName, self::SEPARATOR) !== false)
@@ -339,14 +339,14 @@ class Container
             if (strstr($extendService, self::SEPARATOR)) {
                 // TODO nested container
             } else {
-                $cAlias = $this->_normalizeServiceName($extendService);
+                $cAlias = $this->_normalizeName($extendService);
                 if (!$this->services[$cAlias]->isAllowOverride())
                     $throw = array($newName, $extendService);
             }
         }
 
         # check for registered service with same alias name:
-        $cAlias = $this->_normalizeServiceName($newName);
+        $cAlias = $this->_normalizeName($newName);
         if ($this->has($newName))
             // Alias is present as a service
             if (!$this->services[$cAlias]->isAllowOverride())
@@ -406,7 +406,7 @@ class Container
                 'Namespace can`t be empty.'
             );
 
-        $cNamespace = $this->_normalizeServiceName($namespace);
+        $cNamespace = $this->_normalizeName($namespace);
         if (isset($this->__nestRight[$cNamespace]))
             throw new \InvalidArgumentException(sprintf(
                 'Namespace (%s) is exists on container:%s'
@@ -473,7 +473,7 @@ class Container
         return $cContainer->from(implode(self::SEPARATOR, $brkNamespace));
     }
 
-    
+
     // ...
 
     /* Create Service Instance */
@@ -554,7 +554,7 @@ class Container
      */
     protected function _hasExtendAliases($alias)
     {
-        $cAlias = $this->_normalizeServiceName($alias);
+        $cAlias = $this->_normalizeName($alias);
         return isset($this->aliases[$cAlias]);
     }
     
@@ -570,7 +570,7 @@ class Container
      * @throws \Exception
      * @return string
      */
-    protected function _normalizeServiceName($name)
+    protected function _normalizeName($name)
     {
         if (!is_string($name) || $name === '' )
             throw new \Exception(sprintf(
