@@ -6,6 +6,7 @@ use Poirot\Std\ErrorStack;
 use Poirot\Ioc\Interfaces\iContainer;
 use Poirot\Ioc\Interfaces\Respec\iServicesAware;
 use Poirot\Ioc\Container\Interfaces\iContainerService;
+use Poirot\Ioc\Container\Interfaces\iServiceDelegateFeature;
 
 use Poirot\Ioc\Container\BuilderContainer;
 use Poirot\Ioc\Container\InitializerAggregate;
@@ -145,6 +146,9 @@ class Container
     /**
      * Register a service to container
      *
+     * ! Services that implement iServiceDelegateFeature will
+     *   delegate to Container self.
+     *
      * @param iContainerService $service Service
      *
      * @throws \Exception
@@ -152,6 +156,9 @@ class Container
      */
     function set(iContainerService $service)
     {
+        if ($service instanceof iServiceDelegateFeature)
+            $service->delegate($this);
+        
         $name  = $service->getName();
         $cName = $this->_normalizeServiceName($name);
         if ($this->has($name) && !$this->services[$cName]->isAllowOverride())

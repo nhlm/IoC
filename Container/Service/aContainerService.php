@@ -13,6 +13,7 @@ use Poirot\Ioc\Container\Interfaces\iContainerService;
 abstract class aContainerService
     extends    ConfigurableSetter
     implements iContainerService
+    , Container\Interfaces\iServiceDelegateFeature
     , iServicesComplex
 {
     /**
@@ -71,6 +72,12 @@ abstract class aContainerService
      * @return mixed
      */
     abstract function createService();
+
+    function delegate(Container $container)
+    {
+        // Implement Delegate Feature If Mandatory
+        /** @see Container::set */
+    }
 
     /**
      * Set Service Name
