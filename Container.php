@@ -288,29 +288,6 @@ class Container
     }
 
     /**
-     * Builder Initializer Aggregate
-     *
-     * @return InitializerAggregate
-     */
-    function initializer()
-    {
-        if (!$this->initializer) {
-            $this->initializer = new InitializerAggregate;
-
-            // add default initializer:
-
-            $thisContainer = $this;
-            $this->initializer->addCallable(function($instance) use ($thisContainer) {
-                if ($instance instanceof iServicesAware)
-                    // Inject Service Container Inside
-                    $instance->setServices($thisContainer);
-            }, 10000);
-        }
-
-        return $this->initializer;
-    }
-
-    /**
      * Get Extend Service Name That This Service Extended Of That
      *
      * - if not extend any, return same service name
@@ -386,6 +363,28 @@ class Container
         return $this;
     }
 
+    /**
+     * Builder Initializer Aggregate
+     *
+     * @return InitializerAggregate
+     */
+    function initializer()
+    {
+        if (!$this->initializer) {
+            $this->initializer = new InitializerAggregate;
+
+            // add default initializer:
+
+            $thisContainer = $this;
+            $this->initializer->addCallable(function($instance) use ($thisContainer) {
+                if ($instance instanceof iServicesAware)
+                    // Inject Service Container Inside
+                    $instance->setServices($thisContainer);
+            }, 10000);
+        }
+
+        return $this->initializer;
+    }
 
     // Nested Containers:
 
@@ -474,6 +473,7 @@ class Container
         return $cContainer->from(implode(self::SEPARATOR, $brkNamespace));
     }
 
+    
     // ...
 
     /* Create Service Instance */
