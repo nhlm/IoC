@@ -1,7 +1,9 @@
 <?php
 namespace Poirot\Ioc\Container\Service;
 
-class InstanceService 
+use Poirot\Std\Interfaces\Pact\ipOptionsProvider;
+
+class InstanceService
     extends aContainerService
 {
     protected $service;
@@ -11,6 +13,7 @@ class InstanceService
      *
      * also can used as:
      * - new InstanceService('name', $service);
+     * - new InstanceService('name', [ 'service' => [..] ..options]);
      * or setter set
      * - new InstanceService([ 'service' => [..] ..options])
      *
@@ -19,28 +22,31 @@ class InstanceService
      */
     function __construct($nameOrSetter = null, $setter = null)
     {
-        if (is_string($nameOrSetter)) {
-            ## __construct('name', [$this, 'method'])
-            $this->setName($nameOrSetter);
-            $this->setService($setter);
-        }
+        if (is_string($nameOrSetter) && !is_array($setter))
+            ## new InstanceService('name', $service)
+            $setter = array('service' => $setter);
         
-        parent::__construct($nameOrSetter);
+        parent::__construct($nameOrSetter, $setter);
     }
 
     /**
      * Create Service
      *
-     * TODO $this->invoke_options as new instance constructor
-     *
      * @return mixed
      */
     function createService()
     {
-        if(is_string($this->service) && class_exists($this->service))
-            $this->service = new $this->service;
+        $service = $this->service;
 
-        return $this->service;
+        if(is_string($this->service) && class_exists($this->service))
+            // TODO options as new instance constructor; use resolver
+            $service = new $service($this->optsData());
+
+        if ($service instanceof ipOptionsProvider)
+            ## using Pact Options Provider Contract
+            $service->optsData()->import($this->optsData());
+
+        return $service;
     }
 
     /**
@@ -51,4 +57,3 @@ class InstanceService
         $this->service = $class;
     }
 }
- 
