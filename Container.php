@@ -533,10 +533,10 @@ class Container
         $throw = true;
         if (interface_exists($implement))
             ## check implementation of given interface
-            $throw = !(in_array(class_implements($instance), $implement));
+            $throw = !(in_array($implement, class_implements($instance)));
         elseif (class_exists($implement))
             ## check implementation of extended class
-            $throw = !(is_subclass_of($instance, $implement));
+            $throw = !($instance instanceof $implement || is_subclass_of($instance, $implement));
 
         if ($throw)
             throw new \Exception(sprintf(
