@@ -418,7 +418,7 @@ class Container
         // ..
 
         $initializer = new InitializerAggregate;
-        
+
         # attach defaults:
         $thisContainer = $this;
         $initializer->addCallable(function($instance) use ($thisContainer) {
@@ -607,12 +607,13 @@ class Container
      */
     function _storeCService($name, iContainerService $service)
     {
-        $cName = $this->_normalizeName($name);
-
         if ($this->isExtendedService($name))
-            ## this is alias and when service register with this name; alias will deleted
-            unset($this->aliases[$cName]);
+        ## service for aliases will set into root
+        {
+            $name = $this->getExtended($name);
+        }
 
+        $cName = $this->_normalizeName($name);
         $this->services[$cName] = $service;
     }
 
