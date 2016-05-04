@@ -98,17 +98,17 @@ class Container
      *  - string '\InterfaceName'
      *  - object get implemented interfaces
      *
-     * @param string        $serviceName Service name
+     * @param string        $nameOrAlias Service name
      * @param string|object $implement   Interface Or Object Implementation
      *
      * @throws \Exception
      * @return $this
      */
-    function setImplementation($serviceName, $implement)
+    function setImplementation($nameOrAlias, $implement)
     {
-        if ($this->has($serviceName))
+        if ($this->has($nameOrAlias))
             throw new \Exception(
-                "Service ({$serviceName}) is implemented; 
+                "Service ({$nameOrAlias}) is implemented; 
                 Interface must define before service registration."
             );
 
@@ -117,28 +117,32 @@ class Container
                 "Invalid interface arguments, this must be valid interface name; given ({$implement})."
             );
 
+        // ..
+
         if (is_object($implement))
             $implement = get_class($implement);
 
-        $serviceName = $this->_normalizeName($serviceName);
-        $this->implementations[$serviceName] = $implement;
+        $nameOrAlias = $this->_normalizeName($nameOrAlias);
+        $this->implementations[$nameOrAlias] = $implement;
         return $this;
     }
 
     /**
      * Get Implementation Interface of Service Contract
      *
-     * @param string $serviceName
+     * @param string $nameOrAlias
      *
      * @return string|false
      */
-    function hasImplementation($serviceName)
+    function hasImplementation($nameOrAlias)
     {
-        $serviceName = $this->_normalizeName($serviceName);
+        #! When Service Extend From Another Must Have Same Implementation Rules
+        $nameOrAlias = $this->getExtended($nameOrAlias);
+        $nameOrAlias = $this->_normalizeName($nameOrAlias);
 
         return (
-            isset($this->implementations[$serviceName])
-                ? $this->implementations[$serviceName]
+            isset($this->implementations[$nameOrAlias])
+                ? $this->implementations[$nameOrAlias]
                 : false
         );
     }
@@ -156,66 +160,80 @@ class Container
      */
     function set(iContainerService $service)
     {
+        # Invoke Service Features:
         if ($service instanceof iServiceDelegateFeature)
             $service->delegate($this);
-        
+
+        // ..
+
         $name  = $service->getName();
-        $cName = $this->_normalizeName($name);
-        if ($this->has($name) && !$this->services[$cName]->isAllowOverride())
+        if ($this->has($name) && !$this->_attainCService($name)->isAllowOverride())
             throw new \Exception(
                 "A service by the name or alias ({$name}) already exists and cannot be overridden;"
             );
 
-        $this->services[$cName] = $service;
+        $this->_storeCService($name, $service);
         return $this;
     }
 
     /**
      * Check for a registered instance
+     * ! It also check for extend aliases
      *
-     * @param string $serviceName Service Name
+     * @param string $nameOrAlias Service Name
      *
      * @return boolean
      */
-    function has($serviceName)
+    function has($nameOrAlias)
     {
-        ## If ServiceName is Alias then Extended Service must Exists
-        $serviceName = $this->getExtended($serviceName);
-
-        $cName = $this->_normalizeName($serviceName);
-        $flag  = isset($this->services[$cName]);
-        return $flag;
+        #! If ServiceName is Alias then Extended Service must Exists
+        return false !== $this->_attainCService($nameOrAlias);
     }
 
     /**
      * Retrieve a registered service
      * 
-     * !! get always cache the last result of created service
+     * !! always cache the last result of created service
      *    with same options; otherwise using ::fresh instead
-     * 
-     * !! create service of first retrieve and store it.
+     *    create service of first retrieve and store it.
      *    if service not exists self::fresh will call.
      *
-     * @param string $serviceName Service name
+     * @param string $nameOrAlias Service name
      * @param array  $invOpt      Invoke Options
      *
      * @throws \Exception
      * @return mixed
      */
-    function get($serviceName, $invOpt = array())
+    function get($nameOrAlias, $invOpt = array())
     {
-        $cName  = $this->_normalizeName($serviceName);
+        $nameOrAlias = $this->getExtended($nameOrAlias);
+
+        # check if we have alias to nested service:
+        if (strpos($nameOrAlias, self::SEPARATOR) !== false) {
+            // shared alias for nested container
+            /* @see Container::extend */
+
+            $xService = explode(self::SEPARATOR, $nameOrAlias);
+            $nameOrAlias = array_pop($xService);
+
+            return $this->from(implode(self::SEPARATOR, $xService))->get($nameOrAlias);
+        }
+
+
+        // ..
+
+        $cName  = $this->_normalizeName($nameOrAlias);
         ## hash with options, so we get unique service with different options V
         $hashed = md5($cName.\Poirot\Std\flatten($invOpt));
 
-        ## Service From Cache:
+        # Service From Cache:
         if (!array_key_exists($hashed, $this->_c_createdServices)) {
             ## make new fresh instance if service not exists
-            $instance = $this->fresh($serviceName, $invOpt);
+            $instance = $this->fresh($nameOrAlias, $invOpt);
             $this->_c_createdServices[$hashed] = $instance;
 
             ## recursion call to retrieve instance
-            return $this->get($serviceName, $invOpt);
+            return $this->get($nameOrAlias, $invOpt);
         }
 
 
@@ -229,45 +247,43 @@ class Container
     /**
      * Retrieve a fresh instance of service
      *
-     * @param string $serviceName Service name
-     * @param mixed  $invOpt Invoke Options
+     * @param string $nameOrAlias Service name
+     * @param mixed  $invOpt      Invoke Options
      *
      * @throws \Exception
      * @return mixed
      */
-    function fresh($serviceName, $invOpt = array())
+    function fresh($nameOrAlias, $invOpt = array())
     {
-        $orgName     = $serviceName;
-        $serviceName = $this->getExtended($serviceName);
+        $orgName     = $nameOrAlias;
+        $nameOrAlias = $this->getExtended($nameOrAlias);
 
-        # check if we have alias to nested service ...................................................\
-        if (strpos($serviceName, self::SEPARATOR) !== false) {
+        # check if we have alias to nested service:
+        if (strpos($nameOrAlias, self::SEPARATOR) !== false) {
             // shared alias for nested container
             /* @see Container::extend */
 
-            $xService    = explode(self::SEPARATOR, $serviceName);
-            $serviceName = array_pop($xService);
+            $xService    = explode(self::SEPARATOR, $nameOrAlias);
+            $nameOrAlias = array_pop($xService);
 
-            return $this->from(implode(self::SEPARATOR, $xService))->get($serviceName);
+            return $this->from(implode(self::SEPARATOR, $xService))->fresh($nameOrAlias);
         }
 
 
         // ..
 
-        if (!$this->has($serviceName))
+        if (!$this->has($nameOrAlias))
             throw new exContainerNoService(sprintf(
                 '%s (%s) was requested but no service could be found.'
-                , ($serviceName !== $orgName)
-                    ? "Service ($serviceName) with alias"
+                , ($nameOrAlias !== $orgName)
+                    ? "Service ($nameOrAlias) with alias"
                     : 'Service'
                 , $orgName
             ));
 
 
-        # attain service instance ...................................................................\
-        $cName = $this->_normalizeName($serviceName);
-        /** @var iContainerService $inService */
-        $inService = $this->services[$cName];
+        # Attain Service Instance:
+        $inService = $this->_attainCService($nameOrAlias);
 
         # Refresh Service:
         try
@@ -296,17 +312,17 @@ class Container
      *
      * - if not extend any, return same service name
      *
-     * @param string $serviceName
+     * @param string $nameOrAlias
      *
      * @return string
      */
-    function getExtended($serviceName)
+    function getExtended($nameOrAlias)
     {
-        while ($this->isExtendedService($serviceName)) {
-            $cAlias = $this->_normalizeName($serviceName);
-            $serviceName  = $this->aliases[$cAlias];
+        while ($this->isExtendedService($nameOrAlias)) {
+            $cAlias      = $this->_normalizeName($nameOrAlias);
+            $nameOrAlias = $this->aliases[$cAlias];
             ## check if we have alias to nested service
-            if (strpos($serviceName, self::SEPARATOR) !== false)
+            if (strpos($nameOrAlias, self::SEPARATOR) !== false)
                 // we have an aliases that used as
                 // share services between nested services
                 // in form of "/filesystem/system/folder"
@@ -314,7 +330,7 @@ class Container
                 break; ## so break iteration
         }
 
-        return $serviceName;
+        return $nameOrAlias;
     }
 
     /**
@@ -326,37 +342,44 @@ class Container
      * - Aliases Can be set even if service not found
      *   or service added later
      *
-     * @param string $newName        Alias
-     * @param string $serviceOrAlias Registered Service/Alias
+     * @param string $newName     Alias
+     * @param string $nameOrAlias Registered Service/Alias
      *
      * @throws \Exception
      * @return $this
      */
-    function extend($newName, $serviceOrAlias)
+    function extend($newName, $nameOrAlias)
     {
         $throw = false;
 
-        # If Alias Exists achieve extended service to check has allow override?
-        if ($this->isExtendedService($newName))
+        if ($this->has($newName))
+        // New Name Alias exists as a Service or Alias
+        // - Check has allow override?
         {
-            $extendService = $this->getExtended($newName);
-            ## service from nested containers
-            if (strstr($extendService, self::SEPARATOR)) {
-                // TODO nested container
-            } else {
-                $cAlias = $this->_normalizeName($extendService);
-                if (!$this->services[$cAlias]->isAllowOverride())
-                    $throw = array($newName, $extendService);
-            }
+            if ($this->isExtendedService($newName))
+            // New Name is Alias; achieve extended service
+            {
+                $aliasTo = $this->getExtended($newName);
+
+                ## service from nested containers
+                if (strstr($aliasTo, self::SEPARATOR)) {
+                    $xService = explode(self::SEPARATOR, $aliasTo);
+                    $nestName = array_pop($xService);
+
+                    $inService = $this->from(implode(self::SEPARATOR, $xService))
+                        ->_attainCService($nestName);
+                }
+                else
+                    $inService = $this->_attainCService($aliasTo);
+            } else
+                $inService = $this->_attainCService($newName);
+
+            # ..
+
+            if (!$inService->isAllowOverride())
+                $throw = array($newName, isset($aliasTo) ? $aliasTo : $newName);
         }
 
-        # check for registered service with same alias name:
-        $cAlias = $this->_normalizeName($newName);
-
-        if ($this->has($newName))
-            // Alias is present as a service
-            if (!$this->services[$cAlias]->isAllowOverride())
-                $throw = array($newName, $newName);
 
         if ($throw)
             throw new \Exception(sprintf(
@@ -364,7 +387,8 @@ class Container
                 $throw[0], $throw[1]
             ));
 
-        $this->aliases[$cAlias] = $serviceOrAlias;
+        $cAlias = $this->_normalizeName($newName);
+        $this->aliases[$cAlias] = $nameOrAlias;
         return $this;
     }
 
@@ -388,20 +412,22 @@ class Container
      */
     function initializer()
     {
-        if (!$this->initializer) {
-            $this->initializer = new InitializerAggregate;
+        if ($this->initializer)
+            return $this->initializer;
 
-            // add default initializer:
+        // ..
 
-            $thisContainer = $this;
-            $this->initializer->addCallable(function($instance) use ($thisContainer) {
-                if ($instance instanceof iServicesAware)
-                    // Inject Service Container Inside
-                    $instance->setServices($thisContainer);
-            }, 10000);
-        }
+        $initializer = new InitializerAggregate;
+        
+        # attach defaults:
+        $thisContainer = $this;
+        $initializer->addCallable(function($instance) use ($thisContainer) {
+            if ($instance instanceof iServicesAware)
+                // Inject Service Container Inside
+                $instance->setServices($thisContainer);
+        }, 10000);
 
-        return $this->initializer;
+        return $this->initializer = $initializer;
     }
 
     // Nested Containers:
@@ -561,6 +587,33 @@ class Container
                 'Service with name (%s) must implement (%s); given: %s'
                 , $serviceName, $implement, \Poirot\Std\flatten($instance)
             ));
+    }
+
+    /**
+     * Achieve Service From Name
+     * @param string $name Service name
+     * @return iContainerService|false
+     */
+    function _attainCService($name)
+    {
+        $name  = $this->getExtended($name);
+        $cName = $this->_normalizeName($name);
+        return (isset($this->services[$cName])) ? $this->services[$cName] : false;
+    }
+
+    /**
+     * @param $name
+     * @param iContainerService $service
+     */
+    function _storeCService($name, iContainerService $service)
+    {
+        $cName = $this->_normalizeName($name);
+
+        if ($this->isExtendedService($name))
+            ## this is alias and when service register with this name; alias will deleted
+            unset($this->aliases[$cName]);
+
+        $this->services[$cName] = $service;
     }
 
     /**

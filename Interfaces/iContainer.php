@@ -12,31 +12,31 @@ interface iContainer
      * !! create service of first retrieve and store it.
      *    if service not exists self::fresh will call. 
      *
-     * @param string $serviceName Service name
+     * @param string $nameOrAlias Service name
      * @param array  $invOpt      Invoke Options
      *
      * @throws exContainerCreateService|exContainerNoService
      * @return mixed
      */
-    function get($serviceName, $invOpt = array());
+    function get($nameOrAlias, $invOpt = array());
 
     /**
      * Retrieve a fresh instance of service
      *
-     * @param string $serviceName Service name
+     * @param string $nameOrAlias Service name
      * @param array  $invOpt      Invoke Options
      *
      * @throws exContainerCreateService|exContainerNoService
      * @return mixed
      */
-    function fresh($serviceName, $invOpt = array());
+    function fresh($nameOrAlias, $invOpt = array());
 
     /**
      * Check for a registered instance
      *
-     * @param string $serviceName Service Name
+     * @param string $nameOrAlias Service Name
      *
      * @return boolean
      */
-    function has($serviceName);
+    function has($nameOrAlias);
 }
