@@ -6,11 +6,11 @@ use Poirot\Ioc\Container;
 /**
  * Container Service that Implement this Feature every time
  * that register into Container delegate method will call to
- * prepare with Container.
+ * prepare into Container.
  * 
  * @see Container::set 
  */
-interface iServiceDelegateFeature
+interface iServiceFeatureDelegate
 {
     function delegate(Container $container);
 }

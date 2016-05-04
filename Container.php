@@ -6,7 +6,7 @@ use Poirot\Std\ErrorStack;
 use Poirot\Ioc\Interfaces\iContainer;
 use Poirot\Ioc\Interfaces\Respec\iServicesAware;
 use Poirot\Ioc\Container\Interfaces\iContainerService;
-use Poirot\Ioc\Container\Interfaces\iServiceDelegateFeature;
+use Poirot\Ioc\Container\Interfaces\iServiceFeatureDelegate;
 
 use Poirot\Ioc\Container\BuilderContainer;
 use Poirot\Ioc\Container\InitializerAggregate;
@@ -161,7 +161,7 @@ class Container
     function set(iContainerService $service)
     {
         # Invoke Service Features:
-        if ($service instanceof iServiceDelegateFeature)
+        if ($service instanceof iServiceFeatureDelegate)
             $service->delegate($this);
 
         // ..
