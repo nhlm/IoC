@@ -179,8 +179,12 @@ class Container
      */
     function has($serviceName)
     {
+        ## If ServiceName is Alias then Extended Service must Exists
+        $serviceName = $this->getExtended($serviceName);
+
         $cName = $this->_normalizeName($serviceName);
-        return isset($this->services[$cName]);
+        $flag  = isset($this->services[$cName]);
+        return $flag;
     }
 
     /**
@@ -298,7 +302,7 @@ class Container
      */
     function getExtended($serviceName)
     {
-        while ($this->_hasExtendAliases($serviceName)) {
+        while ($this->isExtendedService($serviceName)) {
             $cAlias = $this->_normalizeName($serviceName);
             $serviceName  = $this->aliases[$cAlias];
             ## check if we have alias to nested service
@@ -332,8 +336,9 @@ class Container
     {
         $throw = false;
 
-        # If Alias Exists check for extended service to allow override or not.
-        if ($this->_hasExtendAliases($newName)) {
+        # If Alias Exists achieve extended service to check has allow override?
+        if ($this->isExtendedService($newName))
+        {
             $extendService = $this->getExtended($newName);
             ## service from nested containers
             if (strstr($extendService, self::SEPARATOR)) {
@@ -347,6 +352,7 @@ class Container
 
         # check for registered service with same alias name:
         $cAlias = $this->_normalizeName($newName);
+
         if ($this->has($newName))
             // Alias is present as a service
             if (!$this->services[$cAlias]->isAllowOverride())
@@ -358,9 +364,21 @@ class Container
                 $throw[0], $throw[1]
             ));
 
-
         $this->aliases[$cAlias] = $serviceOrAlias;
         return $this;
+    }
+
+    /**
+     * Determine if we have an alias name
+     * that extend service
+     *
+     * @param  string $alias
+     * @return bool
+     */
+    function isExtendedService($alias)
+    {
+        $cAlias = $this->_normalizeName($alias);
+        return isset($this->aliases[$cAlias]);
     }
 
     /**
@@ -544,20 +562,7 @@ class Container
                 , $serviceName, $implement, \Poirot\Std\flatten($instance)
             ));
     }
-    
-    /**
-     * Determine if we have an alias name
-     * that extend service
-     *
-     * @param  string $alias
-     * @return bool
-     */
-    protected function _hasExtendAliases($alias)
-    {
-        $cAlias = $this->_normalizeName($alias);
-        return isset($this->aliases[$cAlias]);
-    }
-    
+
     /**
      * Normalize Given Name
      *
