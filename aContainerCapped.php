@@ -1,7 +1,11 @@
 <?php
 namespace Poirot\Ioc;
 
+use Poirot\Ioc\Container\Interfaces\iContainerService;
+use Poirot\Ioc\Container\Service\ServiceInstance;
 use Poirot\Ioc\Plugins\Exception\exContainerInvalidPlugin;
+use Poirot\Loader\Interfaces\iLoader;
+use Poirot\Loader\LoaderMapResource;
 
 /**
  * Container that extends Capped Container
@@ -44,7 +48,7 @@ abstract class aContainerCapped
      */
     function get($serviceName, $invOpt = array())
     {
-        $this->__attainServiceFromLoader($serviceName);
+        $this->_attainServiceFromLoader($serviceName);
         
         $return = parent::get($serviceName, $invOpt);
         $this->validatePlugin($return);
@@ -62,42 +66,13 @@ abstract class aContainerCapped
      */
     function fresh($serviceName, $invOpt = array())
     {
-        $this->__attainServiceFromLoader($serviceName);
+        $this->_attainServiceFromLoader($serviceName);
 
         $return = parent::fresh($serviceName, $invOpt);
         $this->validatePlugin($return);
         return $return;
     }
-
-    protected function __attainServiceFromLoader($serviceName)
-    {
-        if (parent::has($serviceName))
-            return;
-
-
-        $serviceName = $this->_normalizeServiceName($serviceName);
-
-        ## maybe resolved as loader plugin
-        if ($resolved = $this->resolver()->resolve($serviceName)) {
-            $service = $resolved;
-            if (is_string($resolved)) {
-                if (!class_exists($resolved))
-                    throw new \RuntimeException(sprintf(
-                        'Class (%s) not found for (%s) service with Loader Resource.'
-                        ,$resolved ,$serviceName
-                    ));
-
-                $service = new $resolved();
-            }
-
-            if (!$service instanceof iContainerService)
-                $service = new InstanceService($serviceName, $service);
-
-            ### set service so be can retrieved later
-            $this->set($service);
-        }
-    }
-
+    
     /**
      * Check for a registered instance
      *
@@ -113,18 +88,6 @@ abstract class aContainerCapped
 
         return (boolean) $this->resolver()->resolve($serviceName);
     }
-
-
-    /**
-     * List Whole Registered Plugins
-     *
-     * @return array[string]
-     */
-    function listServices()
-    {
-        return array_merge(array_keys($this->loader_resources), array_keys($this->services));
-    }
-
 
     /**
      * @override
@@ -156,13 +119,45 @@ abstract class aContainerCapped
      * ! it may more useful when store resource
      *   with canonicalized names.
      *
-     * @return ResourceMapResolver|iLoader
+     * @return LoaderMapResource|iLoader
      */
     function resolver()
     {
         if (!$this->resolver)
-            $this->resolver = new ResourceMapResolver($this->loader_resources);
+            $this->resolver = new LoaderMapResource($this->loader_resources);
 
         return $this->resolver;
+    }
+    
+    
+    // ..
+
+    protected function _attainServiceFromLoader($serviceName)
+    {
+        if (parent::has($serviceName))
+            return;
+
+
+        $serviceName = $this->_normalizeName($serviceName);
+
+        ## maybe resolved as loader plugin
+        if ($resolved = $this->resolver()->resolve($serviceName)) {
+            $service = $resolved;
+            if (is_string($resolved)) {
+                if (!class_exists($resolved))
+                    throw new \RuntimeException(sprintf(
+                        'Class (%s) not found for (%s) service with Loader Resource.'
+                        ,$resolved ,$serviceName
+                    ));
+
+                $service = new $resolved();
+            }
+
+            if (!$service instanceof iContainerService)
+                $service = new ServiceInstance($serviceName, $service);
+
+            ### set service so be can retrieved later
+            $this->set($service);
+        }
     }
 }
