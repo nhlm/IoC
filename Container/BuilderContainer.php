@@ -3,30 +3,12 @@ namespace Poirot\Ioc\Container;
 
 use Poirot\Std\ConfigurableSetter;
 use Poirot\Std\Interfaces\Pact\ipOptionsProvider;
+
 use Poirot\Ioc\Container;
 use Poirot\Ioc\Container\Service\ServiceInstance;
 use Poirot\Ioc\Container\Interfaces\iContainerInitializer;
 use Poirot\Ioc\Container\Interfaces\iContainerService;
 
-/**
-    
- *
-        # Service Name
-        'dev.lamp.status' => [
-            # or regular class object. (will create instance from factoryService)
-            '_class_' => 'FactoryService', # Prefixed Internaly with Container namespace
-                                           # or full path 'Namespaces\Path\To\Service' class
-            // ... options setter of service class .........................................
-            'delegate' => function() {
-                # Delegates will bind to service object as closure method
-                @var FactoryService $this
-                $sc = $this->getServiceContainer();
-                return $sc->from('files')->get('folder');
-            },
-            'allow_override' => false
-        ],
-
- */
 class BuilderContainer
     extends ConfigurableSetter
 {
@@ -121,7 +103,7 @@ class BuilderContainer
      *    'Path\To\ServiceImplementation' => [':name' => 'serviceName', 'setter' => 'value' ..,
      *    'ServiceName' => [':class' => 'ClassOrServiceImplementation' .. or
      *    'Path\To\ClassName' => [':name' => 'ClassOrServiceImplementation', 'setter' => $value, ..
-     * 
+     *
      * @param array $services
      */
     public function setServices($services)
