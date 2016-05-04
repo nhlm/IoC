@@ -1,23 +1,26 @@
 <?php
-namespace Poirot\Container\Plugins;
+namespace Poirot\Ioc;
 
-use Poirot\Container\Container;
-use Poirot\Container\Exception\ContainerInvalidPluginException;
-use Poirot\Container\Interfaces\iContainerService;
-use Poirot\Container\Service\InstanceService;
-use Poirot\Loader\Interfaces\iLoader;
-use Poirot\Loader\Interfaces\iLoaderProvider;
-use Poirot\Loader\ResourceMapResolver;
+use Poirot\Ioc\Plugins\Exception\exContainerInvalidPlugin;
 
-abstract class AbstractPlugins extends Container
-    implements iLoaderProvider
+/**
+ * Container that extends Capped Container
+ * can have just validated services inside
+ * this validated can achieve the services
+ * from exact type(s).
+ *
+ * e.g View Renderer just have iRenderer
+ * implementation as registered service.
+ */
+abstract class aContainerCapped
+    extends Container
 {
-    protected $loader_resources = [
+    protected $loader_resources = array(
         # 'canonicalized_name' => string(ClassName) // class can be instance of iCService or not
         # 'canonicalized_name' => iCService|Object
-    ];
+    );
 
-    /** @var iLoader|ResourceMapResolver */
+    /** @var iLoader|LoaderMapResource */
     protected $resolver;
 
     /**
@@ -25,7 +28,7 @@ abstract class AbstractPlugins extends Container
      *
      * @param mixed $pluginInstance
      *
-     * @throws ContainerInvalidPluginException
+     * @throws exContainerInvalidPlugin
      * @return void
      */
     abstract function validatePlugin($pluginInstance);
@@ -36,16 +39,15 @@ abstract class AbstractPlugins extends Container
      * @param string $serviceName Service name
      * @param array  $invOpt      Invoke Options
      *
-     * @throws ContainerInvalidPluginException
+     * @throws exContainerInvalidPlugin
      * @return mixed
      */
-    function get($serviceName, $invOpt = [])
+    function get($serviceName, $invOpt = array())
     {
         $this->__attainServiceFromLoader($serviceName);
         
         $return = parent::get($serviceName, $invOpt);
         $this->validatePlugin($return);
-
         return $return;
     }
 
@@ -58,13 +60,12 @@ abstract class AbstractPlugins extends Container
      * @throws \Exception
      * @return mixed
      */
-    function fresh($serviceName, $invOpt = [])
+    function fresh($serviceName, $invOpt = array())
     {
         $this->__attainServiceFromLoader($serviceName);
 
         $return = parent::fresh($serviceName, $invOpt);
         $this->validatePlugin($return);
-
         return $return;
     }
 

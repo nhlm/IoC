@@ -1,14 +1,14 @@
 <?php
 namespace Poirot\Container\Interfaces\Plugins;
 
-use Poirot\Container\Plugins\AbstractPlugins;
+use Poirot\Container\Plugins\aContainerCapped;
 
 interface iPluginManagerProvider
 {
     /**
      * Get Plugins Manager
      *
-     * @return AbstractPlugins
+     * @return aContainerCapped
      */
     function getPluginManager();
 }

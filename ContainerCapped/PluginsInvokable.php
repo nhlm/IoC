@@ -17,7 +17,7 @@ $invokablePlugins
 
 class PluginsInvokable
 {
-    /** @var AbstractPlugins */
+    /** @var aContainerCapped */
     protected $plugins;
     /** @var array|null */
     protected $options = null;
@@ -25,9 +25,9 @@ class PluginsInvokable
     /**
      * Construct
      *
-     * @param AbstractPlugins $plugins
+     * @param aContainerCapped $plugins
      */
-    function __construct(AbstractPlugins $plugins)
+    function __construct(aContainerCapped $plugins)
     {
         $this->plugins = $plugins;
     }
