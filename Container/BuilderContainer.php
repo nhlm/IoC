@@ -4,7 +4,7 @@ namespace Poirot\Ioc\Container;
 use Poirot\Std\ConfigurableSetter;
 use Poirot\Std\Interfaces\Struct\iData;
 use Poirot\Ioc\Container;
-use Poirot\Ioc\Container\Service\InstanceService;
+use Poirot\Ioc\Container\Service\ServiceInstance;
 use Poirot\Ioc\Container\Interfaces\iContainerInitializer;
 use Poirot\Ioc\Container\Interfaces\iContainerService;
 
@@ -300,7 +300,7 @@ class BuilderContainer
                         throw new \InvalidArgumentException($this->namespace.": Service '$key' not recognized.");
 
                     $name     = (isset($service['_name_'])) ? $service['_name_'] : $name;
-                    $instance = new InstanceService($name, $instance);
+                    $instance = new ServiceInstance($name, $instance);
                 }
 
                 $container->set($instance);

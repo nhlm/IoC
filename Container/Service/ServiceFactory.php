@@ -29,8 +29,8 @@ use Poirot\ArgsResolver\ANamedResolver;
  *
  */
 
-class FunctorService 
-    extends aContainerService
+class ServiceFactory 
+    extends aServiceContainer
 {
     /**
      * Function Arguments as a Container::get arg. options

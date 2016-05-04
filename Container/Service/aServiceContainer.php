@@ -10,7 +10,7 @@ use Poirot\Ioc\Interfaces\iContainer;
 use Poirot\Ioc\Interfaces\Respec\iServicesComplex;
 use Poirot\Ioc\Container\Interfaces\iContainerService;
 
-abstract class aContainerService
+abstract class aServiceContainer
     extends    ConfigurableSetter
     implements iContainerService
     , Container\Interfaces\iServiceDelegateFeature

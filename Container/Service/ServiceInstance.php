@@ -3,8 +3,8 @@ namespace Poirot\Ioc\Container\Service;
 
 use Poirot\Std\Interfaces\Pact\ipOptionsProvider;
 
-class InstanceService
-    extends aContainerService
+class ServiceInstance
+    extends aServiceContainer
 {
     protected $service;
 
