@@ -433,7 +433,7 @@ class Container
     // Nested Containers:
 
     /**
-     * Nest A Copy Of Container Within This Container
+     * Nest A Container Within
      *
      * @param Container   $container
      * @param string|null $namespace Container Namespace
@@ -450,14 +450,14 @@ class Container
                 'Namespace can`t be empty.'
             );
 
-        $cNamespace = $this->_normalizeName($namespace);
+        $cNamespace = $this->_normalizeNamespace($namespace);
         if (isset($this->__nestRight[$cNamespace]))
             throw new \InvalidArgumentException(sprintf(
                 'Namespace (%s) is exists on container:%s'
                 , $namespace , $this->getNamespace()
             ));
 
-        $nestedCnt = clone $container;
+        $nestedCnt = $container;
         $nestedCnt->__nestLeft = $this; // set parent container
         $nestedCnt->setNamespace($namespace);
         $this->__nestRight[$cNamespace] = $nestedCnt;
