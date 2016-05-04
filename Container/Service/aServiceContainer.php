@@ -13,7 +13,7 @@ use Poirot\Ioc\Container\Interfaces\iContainerService;
 abstract class aServiceContainer
     extends    ConfigurableSetter
     implements iContainerService
-    , Container\Interfaces\iServiceDelegateFeature
+    , Container\Interfaces\iServiceFeatureDelegate
     , iServicesComplex
 {
     /**
