@@ -2,27 +2,18 @@
 namespace Poirot\Ioc\Container;
 
 use Poirot\Std\ConfigurableSetter;
-use Poirot\Std\Interfaces\Struct\iData;
+use Poirot\Std\Interfaces\Pact\ipOptionsProvider;
 use Poirot\Ioc\Container;
 use Poirot\Ioc\Container\Service\ServiceInstance;
 use Poirot\Ioc\Container\Interfaces\iContainerInitializer;
 use Poirot\Ioc\Container\Interfaces\iContainerService;
 
 /**
-    'services'   => [
-        new FactoryService(['name' => 'sysdir',
-            'delegate' => function() {
-                // Delegates will bind to service object as closure method
-                $sc = $this->getServiceContainer();
-                return $sc->from('files')->get('folder');
-            },
-            'allow_override' => false
-        ]),
+    
  *
-        // or
         # Service Name
         'dev.lamp.status' => [
-                          # or regular class object. (will create instance from factoryService)
+            # or regular class object. (will create instance from factoryService)
             '_class_' => 'FactoryService', # Prefixed Internaly with Container namespace
                                            # or full path 'Namespaces\Path\To\Service' class
             // ... options setter of service class .........................................
@@ -34,19 +25,7 @@ use Poirot\Ioc\Container\Interfaces\iContainerService;
             },
             'allow_override' => false
         ],
- *
- *      'HomeInfo' => 'Application\Actions\HomeInfo',
 
- *      // or
-        # just a iCService Implementation,
-        # service name are included in class
-        'ClassName',                      # Prefixed Internaly with Container namespace
-                                          # or full path 'Namespaces\Path\To\Service' class
-        // You Can Set Options
-        # Implementation of iCService or any object
- *      'ClassName' => ['_name_' => 'serviceName', 'option' => 'value' ],
- *
-    ],
  */
 class BuilderContainer
     extends ConfigurableSetter
@@ -132,6 +111,17 @@ class BuilderContainer
     }
 
     /**
+     * 'services'   => [
+     *    new ServiceFactory('serviceName', $callable),     // must be iContainerService
+     *    'Path\To\ServiceImplementation',                  // must be iContainerService
+     *    'env' => P\Std\Environment\EnvDevelopment::class, // register internally with ServiceInstance
+     *
+     *    # Implementation of iCService or any object
+     *    'ServiceFactory' => ... or
+     *    'Path\To\ServiceImplementation' => [':name' => 'serviceName', 'setter' => 'value' ..,
+     *    'ServiceName' => [':class' => 'ClassOrServiceImplementation' .. or
+     *    'Path\To\ClassName' => [':name' => 'ClassOrServiceImplementation', 'setter' => $value, ..
+     * 
      * @param array $services
      */
     public function setServices($services)
@@ -252,58 +242,77 @@ class BuilderContainer
      * @param Container $container
      * @throws \Exception
      */
-    private function _buildService(Container $container)
+    protected function _buildService(Container $container)
     {
-        if (!empty($this->services))
-            foreach($this->services as $key => $service) {
-                if (is_string($key) && is_array($service))
-                {
-                    if (array_key_exists('_class_', $service)) {
-                        // *** [ 'service_name' => [ '_class_' => 'serviceClass', /* options */ ], ...]
-                        // ***
-                        $service['name'] = $key;
-                        $key             = $service['_class_'];
-                        unset($service['_class_']);
-                    }
-                    // *** else: [ 'serviceClass' => [ /* options */ ], ...]
-                    // ***
-                    if (!class_exists($key) && strstr($key, '\\') === false)
-                        // this is FactoryService style,
-                        // must prefixed with own namespace
-                        $key = '\\'.__NAMESPACE__.'\\Service\\'.$key;
+        foreach($this->services as $key => $v)
+        {
+            $name     = null;
+            $class    = null;   // Object, Object:Service, 'ClassName', 'ServiceFactory'
+            $instance = null;
+            $options  = array();
 
-                    $class = $key;
-                } else
-                {
-                    // *** Looking For Class 'Path\To\Class'
-                    // ***
-                    $class   = $service;
-                    $name    = $key;
-                    $service = array(); // service without options
+            if (is_string($key) && is_array($v))
+            {
+                // [ 'ServiceName' => [':class' => 'ClassOrServiceImplementation' .. or
+                // [ 'Path\To\ClassName' => [':name' => 'ClassOrServiceImplementation', 'setter' => $value, ..
+                // [ 'ServiceFactory' => .. or
+                // [ 'Path\To\ServiceImplementation' => [':name' => 'serviceName', 'setter' => 'value' ..,
+                $class = $key;
+
+                if (array_key_exists(':class', $v)) {
+                    // [ 'service_name' => [ ':class' => ...
+                    $v[':name'] = $key;
+                    $class = $v[':class'];
+                    unset($v[':class']);
                 }
 
-                if (is_object($class))
-                    $instance = $class;
-                else {
-                    if (!class_exists($class))
-                        throw new \Exception($this->namespace.": Service '$key' not found as Class Name.");
-
-                    $instance = new $class;
+                if (array_key_exists(':name', $v)) {
+                    $name = $v[':name'];
+                    unset($v[':name']);
                 }
 
-                if ($instance instanceof iContainerService || $instance instanceof iData)
-                    // TODO container options
-                    $instance->import($service);
-
-                if (!$instance instanceof iContainerService) {
-                    if (!array_key_exists('name', $service) && !isset($name))
-                        throw new \InvalidArgumentException($this->namespace.": Service '$key' not recognized.");
-
-                    $name     = (isset($service['_name_'])) ? $service['_name_'] : $name;
-                    $instance = new ServiceInstance($name, $instance);
+                if (!class_exists($class) && strstr($class, '\\') === false) {
+                    // [ 'ServiceFactory' => ...
+                    // try to achieve as default services
+                    $class = '\\'.__NAMESPACE__.'\\Service\\'.ucfirst($class);
                 }
 
-                $container->set($instance);
+                $options = $v;
             }
+            else
+            {
+                // [ new ServiceFactory('serviceName', $callable),
+                // [ 'Path\To\ServiceImplementation',
+                // [ 'env' => P\Std\Environment\EnvDevelopment::class,
+                $class   = $v;
+                $name    = $key;
+            }
+
+            if (is_object($class))
+                // [ new ServiceFactory('serviceName', $callable),
+                $instance = $class;
+            else {
+                // [ 'Path\To\ServiceImplementation',
+                // [ 'env' => P\Std\Environment\EnvDevelopment::class,
+                if (!class_exists($class))
+                    throw new \Exception($this->namespace.": Service '{$key}' not found as Class Name.");
+
+                $instance = new $class;
+            }
+
+            if ($instance instanceof ipOptionsProvider && !empty($options))
+                ## Options Provided Pact
+                $instance->optsData()->import($options);
+
+            if (!$instance instanceof iContainerService) {
+                // [ new ServiceFactory('serviceName', $callable),
+                if ($name === null)
+                    throw new \InvalidArgumentException($this->namespace.": Service '$key' not recognized.");
+
+                $instance = new ServiceInstance($name, $instance);
+            }
+
+            $container->set($instance);
+        }
     }
 }
