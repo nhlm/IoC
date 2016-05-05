@@ -605,10 +605,10 @@ class Container
         // Aggregate Feature:
         if ($return === false) {
             ## Looking in Aggregate Feature Services
-            /** @var iContainerService $inService */
+            /** @var iServiceFeatureAggregate $inService */
             foreach ($this->services_aggregate as $inService)
-                if ($inService->has($name))
-                    return $inService->with($name);
+                if ($inService->canCreate($name))
+                    return $inService->by($name);
         }
 
         return $return;
