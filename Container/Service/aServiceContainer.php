@@ -71,7 +71,7 @@ abstract class aServiceContainer
      *
      * @return mixed
      */
-    abstract function createService();
+    abstract function newService();
 
     function delegate(Container $container)
     {

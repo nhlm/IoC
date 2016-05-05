@@ -34,7 +34,7 @@ class ServiceInstance
      *
      * @return mixed
      */
-    function createService()
+    function newService()
     {
         $service = $this->service;
 

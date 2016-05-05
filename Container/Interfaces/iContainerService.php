@@ -27,8 +27,11 @@ interface iContainerService
      *
      * @return mixed
      */
-    function createService();
+    function newService();
 
+    
+    // options:
+    
     /**
      * Set Allow Override By Service
      *

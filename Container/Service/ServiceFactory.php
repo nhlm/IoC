@@ -95,7 +95,7 @@ class ServiceFactory
      *
      * @return mixed
      */
-    function createService()
+    function newService()
     {
         $callable = $this->callable;
         if ($callable === null)
