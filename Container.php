@@ -12,6 +12,7 @@ use Poirot\Ioc\Container\BuilderContainer;
 use Poirot\Ioc\Container\InitializerAggregate;
 use Poirot\Ioc\Exception\exContainerCreateService;
 use Poirot\Ioc\Exception\exContainerNoService;
+use Poirot\Ioc\Container\Interfaces\iServiceFeatureAggregate;
 
 class Container
     implements iContainer
@@ -33,9 +34,9 @@ class Container
     );
 
     /** @var array Registered Services */
-    protected $services = array(
-        # iContainerService,
-    );
+    protected $services = array(/*iContainerService,*/);
+    protected $services_aggregate = array(/*iContainerService,*/);
+
 
     /** @var array shared instances */
     protected $_c_createdServices = array();
@@ -529,7 +530,7 @@ class Container
         $this->_initializeServiceOrInstance($inService);
 
         # Retrieve Initialized Instance From Service
-        $rInstance = $inService->createService();
+        $rInstance = $inService->newService();
         $this->_initializeServiceOrInstance($rInstance);
 
         if ($exception = ErrorStack::handleDone())
@@ -596,9 +597,21 @@ class Container
      */
     function _attainCService($name)
     {
-        $name  = $this->getExtended($name);
-        $cName = $this->_normalizeName($name);
-        return (isset($this->services[$cName])) ? $this->services[$cName] : false;
+        $name   = $this->getExtended($name);
+
+        $cName  = $this->_normalizeName($name);
+        $return = (isset($this->services[$cName])) ? $this->services[$cName] : false;
+
+        // Aggregate Feature:
+        if ($return === false) {
+            ## Looking in Aggregate Feature Services
+            /** @var iContainerService $inService */
+            foreach ($this->services_aggregate as $inService)
+                if ($inService->has($name))
+                    return $inService->with($name);
+        }
+
+        return $return;
     }
 
     /**
@@ -607,11 +620,15 @@ class Container
      */
     function _storeCService($name, iContainerService $service)
     {
+        // Aggregate Feature:
+        if ($service instanceof iServiceFeatureAggregate) {
+            $this->services_aggregate[] = $service;
+            return;
+        }
+
         if ($this->isExtendedService($name))
         ## service for aliases will set into root
-        {
             $name = $this->getExtended($name);
-        }
 
         $cName = $this->_normalizeName($name);
         $this->services[$cName] = $service;
