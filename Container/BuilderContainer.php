@@ -23,7 +23,7 @@ class BuilderContainer
      * @override Force to throw Exception on invalid Options
      * @inheritdoc
      */
-    function with(array $options, $throwException = true)
+    function with($options, $throwException = true)
     {
         parent::with($options, $throwException);
     }
