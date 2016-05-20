@@ -1,8 +1,6 @@
 <?php
 namespace Poirot\Ioc\Container\Service;
 
-use Poirot\ArgsResolver\ANamedResolver;
-
 /*
  * $container->set(new FunctorService([
  *       'name'     => 'serviceName',
@@ -109,21 +107,7 @@ class ServiceFactory
 
         // ...
         $arguments = $this->optsData();
-        
-        if (class_exists('\Poirot\ArgsResolver\ANamedResolver\ANamedResolver')) {
-            ## Resolve To Callback Arguments From Invoke Options
-            try {
-                $arguments = $this->__getArgsResolver()->bind($callable)
-                    ->resolve($arguments);
-            } catch(\Exception $e) { }
-        }
-        
-        $arguments = \Poirot\Std\cast($arguments);
-        return call_user_func_array($callable, $arguments->toArray());
-    }
-
-    protected function __getArgsResolver()
-    {
-        return new ANamedResolver;
+        $callable  = \Poirot\Std\Invokable\resolveArguments($callable, $arguments);
+        return call_user_func($callable);
     }
 }
