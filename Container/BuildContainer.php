@@ -9,7 +9,7 @@ use Poirot\Ioc\Container\Service\ServiceInstance;
 use Poirot\Ioc\Container\Interfaces\iContainerInitializer;
 use Poirot\Ioc\Container\Interfaces\iContainerService;
 
-class BuilderContainer
+class BuildContainer
     extends ConfigurableSetter
 {
     protected $namespace;
@@ -203,7 +203,7 @@ class BuilderContainer
 
         foreach($this->nested as $namespace => $nest) {
             if (is_array($nest))
-                $nest = new Container(new BuilderContainer($nest));
+                $nest = new Container(new BuildContainer($nest));
 
             
             if (!is_string($namespace))
