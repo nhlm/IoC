@@ -55,7 +55,7 @@ abstract class aServiceContainer
      * @param string|array $nameOsetter Service name Or Setter Options
      * @param array        $setter      Setter Options
      */
-    function __construct($nameOsetter, array $setter = array())
+    function __construct($nameOsetter = null, array $setter = array())
     {
         if (is_string($nameOsetter))
             $setter['name'] = $nameOsetter;
@@ -73,6 +73,12 @@ abstract class aServiceContainer
      */
     abstract function newService();
 
+    /**
+     * Prepare Container When Service ::set
+     * into container this method will call
+     *
+     * @param Container $container
+     */
     function delegate(Container $container)
     {
         // Implement Delegate Feature If Mandatory
@@ -130,7 +136,7 @@ abstract class aServiceContainer
      * @param mixed $builder Builder Options
      * @return $this
      */
-    function setOptions($builder)
+    protected function setOptions($builder)
     {
         $this->optsData()->import($builder);
         return $this;
