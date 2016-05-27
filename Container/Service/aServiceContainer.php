@@ -35,13 +35,13 @@ abstract class aServiceContainer
     protected $allowOverride = true;
 
     /** @var DataOptionsOpen */
-    protected $options;
+    private $options;
 
     /**
      * implement iCServiceAware
      * @var Container Injected Container
      */
-    protected $sc;
+    private $sc;
 
 
     /**
