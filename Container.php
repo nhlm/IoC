@@ -8,7 +8,7 @@ use Poirot\Ioc\Interfaces\Respec\iServicesAware;
 use Poirot\Ioc\Container\Interfaces\iContainerService;
 use Poirot\Ioc\Container\Interfaces\iServiceFeatureDelegate;
 
-use Poirot\Ioc\Container\BuilderContainer;
+use Poirot\Ioc\Container\BuildContainer;
 use Poirot\Ioc\Container\InitializerAggregate;
 use Poirot\Ioc\Exception\exContainerCreateService;
 use Poirot\Ioc\Exception\exContainerNoService;
@@ -55,11 +55,11 @@ class Container
     /**
      * Construct
      *
-     * @param BuilderContainer $cBuilder
+     * @param BuildContainer $cBuilder
      *
      * @throws \Exception
      */
-    function __construct(BuilderContainer $cBuilder = null)
+    function __construct(BuildContainer $cBuilder = null)
     {
         if ($cBuilder !== null)
             $cBuilder->build($this);
