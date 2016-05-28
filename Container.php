@@ -475,8 +475,7 @@ class Container
      *
      * @param string $namespacePath
      *
-     * @throws \Exception On Namespace not found
-     * @return Container
+     * @return Container|false False For namespace not found
      */
     function from($namespacePath)
     {
@@ -490,10 +489,7 @@ class Container
         if (false === strstr($cNamespace, self::SEPARATOR)) {
             ## recursion fallback here !!
             if (!isset($this->__nestRight[$cNamespace]))
-                throw new \Exception(sprintf(
-                    'Namespace (%s) not found on (%s:%s).'
-                    , $namespacePath , get_class($this), $this->getNamespace()
-                ));
+                return false;
 
             return $this->__nestRight[$cNamespace];
         }
