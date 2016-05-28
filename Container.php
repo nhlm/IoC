@@ -124,7 +124,7 @@ class Container
             $implement = get_class($implement);
 
         $nameOrAlias = $this->_normalizeName($nameOrAlias);
-        $this->implementations[$nameOrAlias] = $implement;
+        $this->implementations[$nameOrAlias] = trim($implement, '\\'); // trim [\]Poirot\Classes
         return $this;
     }
 
@@ -291,7 +291,7 @@ class Container
         {
             ## invokeOptions used to build service
             $inService = clone $inService;
-            $inService->optsData()->import($invOpt);
+            if ($invOpt) $inService->optsData()->import($invOpt);
             $instance = $this->_createFromService($inService);
             if ($instance === null)
                 throw new \Exception('service meanwhile found create nothing(null).');

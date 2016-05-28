@@ -12,5 +12,11 @@ use Poirot\Ioc\Container;
  */
 interface iServiceFeatureDelegate
 {
+    /**
+     * Prepare Container When Service ::set 
+     * into container this method will call
+     * 
+     * @param Container $container
+     */
     function delegate(Container $container);
 }

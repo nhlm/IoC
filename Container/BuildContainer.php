@@ -2,6 +2,7 @@
 namespace Poirot\Ioc\Container;
 
 use Poirot\Std\ConfigurableSetter;
+use Poirot\Std\Interfaces\Pact\ipConfigurable;
 use Poirot\Std\Interfaces\Pact\ipOptionsProvider;
 
 use Poirot\Ioc\Container;
@@ -282,10 +283,16 @@ class BuildContainer
                 $instance = new $class;
             }
 
+            ## Inject Dependencies:
+            // TODO can implemented with initializer set by Default Initializer Static
             if ($instance instanceof ipOptionsProvider && !empty($options))
-                ## Options Provided Pact
                 $instance->optsData()->import($options);
 
+            if ($instance instanceof ipConfigurable && !empty($options))
+                $instance->with($options);
+
+
+            ## Instance Service helper:
             if (!$instance instanceof iContainerService) {
                 // [ new ServiceFactory('serviceName', $callable),
                 if ($name === null)
