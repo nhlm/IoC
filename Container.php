@@ -207,7 +207,8 @@ class Container
      */
     function get($nameOrAlias, $invOpt = array())
     {
-        $nameOrAlias = $this->getExtended($nameOrAlias);
+        if (!(strpos($nameOrAlias, self::SEPARATOR) !== false))
+            $nameOrAlias = $this->getExtended($nameOrAlias);
 
         # check if we have alias to nested service:
         if (strpos($nameOrAlias, self::SEPARATOR) !== false) {
