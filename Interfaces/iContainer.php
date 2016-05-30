@@ -1,8 +1,8 @@
 <?php
 namespace Poirot\Ioc\Interfaces;
 
-use Poirot\Container\Exception\exContainerCreateService;
-use Poirot\Container\Exception\exContainerNoService;
+use Poirot\Ioc\Exception\exContainerCreateService;
+use Poirot\Ioc\Exception\exContainerNoService;
 
 interface iContainer
 {

@@ -162,7 +162,7 @@ abstract class aServiceContainer
     /**
      * Get Service Container
      *
-     * @return iContainer
+     * @return Container|iContainer
      */
     function services()
     {
