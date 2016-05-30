@@ -258,7 +258,7 @@ class Container
     function fresh($nameOrAlias, $invOpt = array())
     {
         $orgName     = $nameOrAlias;
-        
+
         if (!(strpos($nameOrAlias, self::SEPARATOR) !== false))
             $nameOrAlias = $this->getExtended($nameOrAlias);
 
@@ -523,17 +523,12 @@ class Container
     /* Create Service Instance */
     protected function _createFromService(iContainerService $inService)
     {
-        ErrorStack::handleError();
-
         # Initialize Service for dependencies etc.
         $this->_initializeServiceOrInstance($inService);
 
         # Retrieve Initialized Instance From Service
         $rInstance = $inService->newService();
         $this->_initializeServiceOrInstance($rInstance);
-
-        if ($exception = ErrorStack::handleDone())
-            throw $exception;
 
         return $rInstance;
     }
