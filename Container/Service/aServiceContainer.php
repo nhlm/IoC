@@ -55,7 +55,7 @@ abstract class aServiceContainer
      * @param string|array $nameOsetter Service name Or Setter Options
      * @param array        $setter      Setter Options
      */
-    function __construct($nameOsetter = null, array $setter = array())
+    function __construct($nameOsetter = null, $setter = array())
     {
         if (is_string($nameOsetter))
             $setter['name'] = $nameOsetter;

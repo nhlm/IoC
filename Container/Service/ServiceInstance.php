@@ -17,10 +17,10 @@ class ServiceInstance
      * or setter set
      * - new InstanceService([ 'service' => [..] ..options])
      *
-     * @param array|callable $nameOrSetter
-     * @param null|string    $setter
+     * @param array|mixed $nameOrSetter
+     * @param array       $setter
      */
-    function __construct($nameOrSetter = null, $setter = null)
+    function __construct($nameOrSetter = null, $setter = array())
     {
         if (is_string($nameOrSetter) && !is_array($setter))
             ## new InstanceService('name', $service)
