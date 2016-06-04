@@ -1,8 +1,6 @@
 <?php
 namespace Poirot\Ioc;
 
-use Poirot\Std\ErrorStack;
-
 use Poirot\Ioc\Interfaces\iContainer;
 use Poirot\Ioc\Interfaces\Respec\iServicesAware;
 use Poirot\Ioc\Container\Interfaces\iContainerService;
