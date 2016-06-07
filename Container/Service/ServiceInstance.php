@@ -38,13 +38,23 @@ class ServiceInstance
     {
         $service = $this->service;
 
-        if(is_string($this->service) && class_exists($this->service))
-            // TODO options as new instance constructor; use resolver
-            $service = new $service($this->optsData());
+        $argsAvailable = \Poirot\Std\cast($this->optsData())->toArray();
+
+        if(is_string($service) && class_exists($service)) {
+            $argsAvailable = \Poirot\Std\cast($this->optsData())->toArray();
+            $rClass   = new \ReflectionClass($service);
+            $rMethod  = $rClass->getMethod('__construct');
+
+            $resolved = \Poirot\Std\Invokable\resolveArgsForReflection($rMethod, $argsAvailable);
+            $service  = $rClass->newInstanceArgs($resolved);
+
+            // let remind options used as features like configurable
+            $argsAvailable = array_diff($argsAvailable, $resolved);
+        }
 
         if ($service instanceof ipConfigurable)
             ## using Pact Options Provider Contract
-            $service->with($this->optsData());
+            $service->with($argsAvailable);
 
         return $service;
     }
@@ -57,3 +67,4 @@ class ServiceInstance
         $this->service = $class;
     }
 }
+
