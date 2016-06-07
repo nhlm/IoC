@@ -107,7 +107,7 @@ class ServiceFactory
 
         // ...
         $arguments = $this->optsData();
-        $callable  = \Poirot\Std\Invokable\resolveArguments($callable, $arguments);
+        $callable  = \Poirot\Std\Invokable\resolveCallableWithArgs($callable, $arguments);
         return call_user_func($callable);
     }
 }
