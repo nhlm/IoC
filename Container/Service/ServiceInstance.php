@@ -1,7 +1,7 @@
 <?php
 namespace Poirot\Ioc\Container\Service;
 
-use Poirot\Std\Interfaces\Pact\ipOptionsProvider;
+use Poirot\Std\Interfaces\Pact\ipConfigurable;
 
 class ServiceInstance
     extends aServiceContainer
@@ -42,9 +42,9 @@ class ServiceInstance
             // TODO options as new instance constructor; use resolver
             $service = new $service($this->optsData());
 
-        if ($service instanceof ipOptionsProvider)
+        if ($service instanceof ipConfigurable)
             ## using Pact Options Provider Contract
-            $service->optsData()->import($this->optsData());
+            $service->with($this->optsData());
 
         return $service;
     }
