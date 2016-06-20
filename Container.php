@@ -216,7 +216,10 @@ class Container
             $xService = explode(self::SEPARATOR, $nameOrAlias);
             $nameOrAlias = array_pop($xService);
 
-            if (false === $nestContainer = $this->from($x = implode(self::SEPARATOR, $xService)))
+            $x = implode(self::SEPARATOR, $xService);
+            if ($x === '') $x = self::SEPARATOR;
+
+            if ( false === $nestContainer = $this->from($x) )
                 throw new \Exception(sprintf('Nested Container (%s) not found.', $x));
 
             return $nestContainer->get($nameOrAlias);
@@ -271,7 +274,10 @@ class Container
             $xService    = explode(self::SEPARATOR, $nameOrAlias);
             $nameOrAlias = array_pop($xService);
 
-            if (false === $nestContainer = $this->from($x = implode(self::SEPARATOR, $xService)))
+            $x = implode(self::SEPARATOR, $xService);
+            if ($x === '') $x = self::SEPARATOR;
+
+            if ( false === $nestContainer = $this->from($x) )
                 throw new \Exception(sprintf('Nested Container (%s) not found.', $x));
 
             return $nestContainer->fresh($nameOrAlias);
