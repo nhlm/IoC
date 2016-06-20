@@ -52,7 +52,7 @@ class ServiceInstance
             $argsAvailable = array_diff($argsAvailable, $resolved);
         }
 
-        if ($service instanceof ipConfigurable)
+        if ($argsAvailable && $service instanceof ipConfigurable)
             ## using Pact Options Provider Contract
             $service->with($argsAvailable);
 
