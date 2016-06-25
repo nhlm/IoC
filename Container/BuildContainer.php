@@ -99,7 +99,7 @@ class BuildContainer
      *    'Path\To\ServiceImplementation',                  // must be iContainerService
      *    'env' => P\Std\Environment\EnvDevelopment::class, // register internally with ServiceInstance
      *
-     *    # Implementation of iCService or any object
+     *    # Implementation of iContainerService or any object
      *    'ServiceFactory' => ... or
      *    'Path\To\ServiceImplementation' => [':name' => 'serviceName', 'setter' => 'value' ..,
      *    'ServiceName' => [':class' => 'ClassOrServiceImplementation' .. or
@@ -278,7 +278,7 @@ class BuildContainer
                 // [ 'Path\To\ServiceImplementation',
                 // [ 'env' => P\Std\Environment\EnvDevelopment::class,
                 if (!class_exists($class))
-                    throw new \Exception($this->namespace.": Service '{$key}' not found as Class Name.");
+                    throw new \Exception($this->namespace.": Class '{$class}' not found as a Service.");
 
                 $instance = new $class;
             }
