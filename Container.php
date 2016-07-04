@@ -222,7 +222,7 @@ class Container
             if ( false === $nestContainer = $this->from($x) )
                 throw new \Exception(sprintf('Nested Container (%s) not found.', $x));
 
-            return $nestContainer->get($nameOrAlias);
+            return $nestContainer->get($nameOrAlias, $invOpt);
         }
 
 
@@ -280,7 +280,7 @@ class Container
             if ( false === $nestContainer = $this->from($x) )
                 throw new \Exception(sprintf('Nested Container (%s) not found.', $x));
 
-            return $nestContainer->fresh($nameOrAlias);
+            return $nestContainer->fresh($nameOrAlias, $invOpt);
         }
 
 
@@ -305,6 +305,7 @@ class Container
             ## invokeOptions used to build service
             $inService = clone $inService;
             if ($invOpt) $inService->optsData()->import($invOpt);
+
             $instance = $this->_createFromService($inService);
             if ($instance === null)
                 throw new \Exception('service meanwhile found create nothing(null).');

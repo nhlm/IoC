@@ -48,7 +48,7 @@ abstract class aServiceContainer
      * aContainerService constructor.
      *
      * [code:]
-     *   new Service('serviceName', ['allow_override' => false])
+     *   new Service('serviceName', ['allow_override' => false, 'options'=> [..] ])
      *   new Service(['name' => 'serviceName', 'allow_override' => false])
      * [code]
      * 
