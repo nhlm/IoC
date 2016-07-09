@@ -525,7 +525,7 @@ class Container
         else $cContainer = $this->from($cNamespace); ## fallback
 
         ## fallback recursion from root parent
-        return $cContainer->from(implode(self::SEPARATOR, $brkNamespace));
+        return ($cContainer == false) ? $cContainer : $cContainer->from(implode(self::SEPARATOR, $brkNamespace));
     }
 
 
