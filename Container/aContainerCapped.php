@@ -40,7 +40,10 @@ abstract class aContainerCapped
     function get($serviceName, $invOpt = array())
     {
         $return = parent::get($serviceName, $invOpt);
-        $this->validateService($return);
+        if (strpos($serviceName, self::SEPARATOR) === false)
+            // validate just services on same namespace
+            $this->validateService($return);
+
         return $return;
     }
 
@@ -56,7 +59,10 @@ abstract class aContainerCapped
     function fresh($serviceName, $invOpt = array())
     {
         $return = parent::fresh($serviceName, $invOpt);
-        $this->validateService($return);
+        if (strpos($serviceName, self::SEPARATOR) === false)
+            // validate just services on same namespace
+            $this->validateService($return);
+
         return $return;
     }
     
