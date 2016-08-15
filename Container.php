@@ -181,10 +181,31 @@ class Container
      *
      * @param string $nameOrAlias Service Name
      *
-     * @return boolean
+     * @return bool
+     * @throws \Exception
      */
     function has($nameOrAlias)
     {
+        if (!(strpos($nameOrAlias, self::SEPARATOR) !== false))
+            $nameOrAlias = $this->getExtended($nameOrAlias);
+
+        # check if we have alias to nested service:
+        if (strpos($nameOrAlias, self::SEPARATOR) !== false) {
+            // shared alias for nested container
+            /* @see Container::extend */
+
+            $xService = explode(self::SEPARATOR, $nameOrAlias);
+            $nameOrAlias = array_pop($xService);
+
+            $x = implode(self::SEPARATOR, $xService);
+            if ($x === '') $x = self::SEPARATOR;
+
+            if ( false === $nestContainer = $this->from($x) )
+                throw new \Exception(sprintf('Nested Container (%s) not found.', $x));
+
+            return $nestContainer->has($nameOrAlias);
+        }
+
         #! If ServiceName is Alias then Extended Service must Exists
         return false !== $this->_attainCService($nameOrAlias);
     }
