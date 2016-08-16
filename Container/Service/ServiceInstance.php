@@ -2,6 +2,7 @@
 namespace Poirot\Ioc\Container\Service;
 
 use Poirot\Std\Interfaces\Pact\ipConfigurable;
+use Poirot\Std\Interfaces\Struct\iData;
 
 class ServiceInstance
     extends aServiceContainer
@@ -49,12 +50,16 @@ class ServiceInstance
             $service  = $rClass->newInstanceArgs($resolved);
 
             // let remind options used as features like configurable
-            $argsAvailable = array_diff($argsAvailable, $resolved);
+            $argsAvailable = @array_diff($argsAvailable, $resolved);
         }
 
-        if ($argsAvailable && $service instanceof ipConfigurable)
-            ## using Pact Options Provider Contract
-            $service->with($argsAvailable);
+        if ($argsAvailable) {
+            if ($service instanceof ipConfigurable)
+                ## using Pact Options Provider Contract
+                $service->with($argsAvailable);
+            elseif ($service instanceof iData)
+                $service->import($argsAvailable);
+        }
 
         return $service;
     }
