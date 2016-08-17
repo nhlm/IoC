@@ -291,12 +291,14 @@ class BuildContainer
             if ($instance instanceof ipConfigurable && !empty($options))
                 $instance->with($options);
 
-
             ## Instance Service helper:
             if (!$instance instanceof iContainerService) {
                 // [ new ServiceFactory('serviceName', $callable),
-                if ($name === null)
-                    throw new \InvalidArgumentException($this->namespace.": Service '$key' not recognized.");
+                if (empty($name))
+                    throw new \InvalidArgumentException(sprintf(
+                        "%s Service Name '%s' not recognized for (%s)."
+                        , $this->namespace, $key, $v
+                    ));
 
                 $instance = new ServiceInstance($name, $instance);
             }
