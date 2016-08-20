@@ -19,7 +19,7 @@ class Container
     const SEPARATOR = '/';
 
     /** @var string Container normalized namespace */
-    protected $namespace = '';
+    protected $name = '';
     /** @var array Child Nested Containers */
     protected $__nestRight = array();
     /** @var null|Container Container That Nested To */
@@ -66,14 +66,14 @@ class Container
     /**
      * Set Container Namespace
      *
-     * @param string $namespace
+     * @param string $name
      *
      * @throws \Exception
      * @return $this
      */
-    function setNamespace($namespace)
+    function setName($name)
     {
-        $this->namespace = $this->_normalizeName($namespace);
+        $this->name = $this->_normalizeName($name);
         return $this;
     }
 
@@ -82,11 +82,25 @@ class Container
      *
      * @return string
      */
-    function getNamespace()
+    function getName()
     {
-        return $this->namespace;
+        return $this->name;
     }
 
+    /**
+     * Get Namespace Path Of Nested Containers
+     * 
+     * @return string
+     */
+    function getPath()
+    {
+        $path = $this->getName();
+        
+        if ($this->__nestLeft)
+            $path = $this->__nestLeft->getPath().self::SEPARATOR.$path;
+        
+        return $path;
+    }
 
     // Service Manager:
 
@@ -479,7 +493,7 @@ class Container
     function nest(Container $container, $namespace = null)
     {
         // Use Container Namespace if not provided as argument
-        ($namespace !== null) ?: $namespace = $container->getNamespace();
+        ($namespace !== null) ?: $namespace = $container->getName();
 
         if ($namespace === null || $namespace === '')
             throw new \InvalidArgumentException(
@@ -490,12 +504,12 @@ class Container
         if (isset($this->__nestRight[$cNamespace]))
             throw new \InvalidArgumentException(sprintf(
                 'Namespace (%s) is exists on container:%s'
-                , $namespace , $this->getNamespace()
+                , $namespace , $this->getName()
             ));
 
         $nestedCnt = $container;
         $nestedCnt->__nestLeft = $this; // set parent container
-        $nestedCnt->setNamespace($namespace);
+        $nestedCnt->setName($namespace);
         $this->__nestRight[$cNamespace] = $nestedCnt;
         return $this;
     }
