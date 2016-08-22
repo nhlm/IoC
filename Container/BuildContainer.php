@@ -13,7 +13,7 @@ use Poirot\Ioc\Container\Interfaces\iContainerService;
 /**
  * Changes:
  * 
- *   - using add to enable builder save current values of class variable
+ *   - enable builder save current values of class variable
  *     exp. $services = [ 'GrantResponder' => \Module\OAuth2\Services\ServiceGrantResponder::class ]
  * 
  */
@@ -364,7 +364,20 @@ class BuildContainer
                 if (!class_exists($class))
                     throw new \Exception($this->namespace.": Class '{$class}' not found as a Service.");
 
-                $instance = new $class;
+                // TODO code clone from ServiceInstance
+                $rClass   = new \ReflectionClass($class);
+                if ($rClass->hasMethod('__construct')) {
+                    // Resolve Arguments to constructor and create new instance
+                    $rMethod  = $rClass->getMethod('__construct');
+                    $resolved = \Poirot\Std\Invokable\resolveArgsForReflection($rMethod, $options);
+                    $instance  = $rClass->newInstanceArgs($resolved);
+
+                    // let remind options used as features like configurable
+                    // $options = @array_diff($options, $resolved);
+                } else {
+                    // service without constructor
+                    $instance = new $class;
+                }
 
                 if (is_string($name) && $instance instanceof iContainerService)
                     $instance->setName($name);

@@ -576,6 +576,10 @@ class Container
         $rInstance = $inService->newService();
         $this->_initializeServiceOrInstance($rInstance);
 
+        if ($rInstance instanceof iContainerService)
+            // Services that return service must continue ...
+            return $this->_createFromService($rInstance);
+
         return $rInstance;
     }
 

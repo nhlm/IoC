@@ -204,4 +204,21 @@ abstract class aServiceContainer
          $opt = new DataOptionsOpen;
          return $opt->import($builder);
      }
+
+    //
+
+    /**
+     * Build Object With Provided Options
+     *
+     * @param array|\Traversable $options        Associated Array
+     * @param bool               $throwException Throw Exception On Wrong Option
+     *
+     * @return array Remained Options (if not throw exception)
+     * @throws \Exception
+     * @throws \InvalidArgumentException
+     */
+    function with($options, $throwException = true)
+    {
+        return parent::with($options, $throwException);
+    }
 }
