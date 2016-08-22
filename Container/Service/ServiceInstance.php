@@ -41,16 +41,27 @@ class ServiceInstance
 
         $argsAvailable = \Poirot\Std\cast($this->optsData())->toArray();
 
-        if(is_string($service) && class_exists($service)) {
-            $argsAvailable = \Poirot\Std\cast($this->optsData())->toArray();
-            $rClass   = new \ReflectionClass($service);
-            $rMethod  = $rClass->getMethod('__construct');
+        if(is_string($service)) {
+            if (class_exists($service)) {
+                $argsAvailable = \Poirot\Std\cast($this->optsData())->toArray();
+                $rClass   = new \ReflectionClass($service);
 
-            $resolved = \Poirot\Std\Invokable\resolveArgsForReflection($rMethod, $argsAvailable);
-            $service  = $rClass->newInstanceArgs($resolved);
+                $resolved = array();
+                if ($rClass->hasMethod('__construct')) {
+                    // Resolve Arguments to constructor and create new instance
+                    $rMethod  = $rClass->getMethod('__construct');
+                    $resolved = \Poirot\Std\Invokable\resolveArgsForReflection($rMethod, $argsAvailable);
+                    $service  = $rClass->newInstanceArgs($resolved);
+                } else {
+                    // service without constructor
+                    $service = new $service;
+                }
 
-            // let remind options used as features like configurable
-            $argsAvailable = @array_diff($argsAvailable, $resolved);
+                // let remind options used as features like configurable
+                $argsAvailable = @array_diff($argsAvailable, $resolved);
+            } elseif ($this->services()->has($service)) {
+                $service = $this->services()->fresh($service);
+            }
         }
 
         if ($argsAvailable) {
