@@ -10,6 +10,14 @@ use Poirot\Ioc\Container\Service\ServiceInstance;
 use Poirot\Ioc\Container\Interfaces\iContainerInitializer;
 use Poirot\Ioc\Container\Interfaces\iContainerService;
 
+/**
+ * Changes:
+ * 
+ *   - using add to enable builder save current values of class variable
+ *     exp. $services = [ 'GrantResponder' => \Module\OAuth2\Services\ServiceGrantResponder::class ]
+ * 
+ */
+
 class BuildContainer
     extends ConfigurableSetter
 {
@@ -75,7 +83,7 @@ class BuildContainer
      *
      * @param string $namespace
      */
-    public function setNamespace($namespace)
+    function setNamespace($namespace)
     {
         $this->namespace = (string) $namespace;
     }
@@ -87,10 +95,25 @@ class BuildContainer
      *    'modules' => new P\Ioc\Container                      // class object
      *
      * @param array $options
+     *
+     * @return $this
      */
-    public function setImplementations($options)
+    function setImplementations($options)
     {
-        $this->implementations = $options;
+        foreach ($options as $key => $v) {
+            if (!is_int($key))
+                $v = array($key => $v);
+
+            $this->addImplementation($v);
+        }
+
+        return $this;
+    }
+
+    function addImplementation($implementation)
+    {
+        $this->_importValueTo($this->implementations, $implementation);
+        return $this;
     }
 
     /**
@@ -106,10 +129,25 @@ class BuildContainer
      *    'Path\To\ClassName' => [':name' => 'ClassOrServiceImplementation', 'setter' => $value, ..
      *
      * @param array $services
+     *
+     * @return $this
      */
-    public function setServices($services)
+    function setServices($services)
     {
-        $this->services = $services;
+        foreach ($services as $key => $v) {
+            if (!is_int($key))
+                $v = array($key => $v);
+
+            $this->addService($v);
+        }
+
+        return $this;
+    }
+
+    function addService($service)
+    {
+        $this->_importValueTo($this->services, $service);
+        return $this;
     }
 
     /**
@@ -117,10 +155,26 @@ class BuildContainer
      *    'newName' => 'serviceOrAlias',
      *
      * @param array $options
+     *
+     * @return $this
      */
-    public function setExtends($options)
+    function setExtends($options)
     {
-        $this->extends = $options;
+        foreach ($options as $key => $v) {
+            if (!is_int($key))
+                $v = array($key => $v);
+
+            $this->addExtend($v);
+        }
+
+
+        return $this;
+    }
+
+    function addExtend($extend)
+    {
+        $this->_importValueTo($this->extends, $extend);
+        return $this;
     }
 
     /**
@@ -133,10 +187,25 @@ class BuildContainer
      *    ]
      *
      * @param array $options
+     *
+     * @return $this
      */
-    public function setInitializers($options)
+    function setInitializers($options)
     {
-        $this->initializers = $options;
+        foreach ($options as $key => $v) {
+            if (!(is_array($v) || $v instanceof iContainerInitializer))
+                $v = array($key => $v);
+
+            $this->addInitializer($v);
+        }
+
+        return $this;
+    }
+
+    function addInitializer($initializer)
+    {
+        $this->_importValueTo($this->initializers, $initializer);
+        return $this;
     }
 
     /**
@@ -148,10 +217,25 @@ class BuildContainer
      *    $builderArrayOption,                // container builder option
      *
      * @param array $options
+     *
+     * @return $this
      */
-    public function setNested($options)
+    function setNested($options)
     {
-        $this->nested = $options;
+        foreach ($options as $key => $v) {
+            if (!is_int($key))
+                $v = array($key => $v);
+
+            $this->addNested($v);
+        }
+
+        return $this;
+    }
+
+    function addNested($nested)
+    {
+        $this->_importValueTo($this->nested, $nested);
+        return $this;
     }
 
 
@@ -160,7 +244,7 @@ class BuildContainer
     protected function _buildNamespace(Container $container)
     {
         if ($this->namespace)
-            $container->setNamespace($this->namespace);
+            $container->setName($this->namespace);
     }
 
     protected function _buildImplementation(Container $container)
@@ -206,10 +290,10 @@ class BuildContainer
             if (is_array($nest))
                 $nest = new Container(new BuildContainer($nest));
 
-            
+
             if (!is_string($namespace))
                 ## nested as options [options, ..]
-                $namespace = $nest->getNamespace();
+                $namespace = $nest->getName();
 
             $container->nest($nest, $namespace);
         }
@@ -281,6 +365,9 @@ class BuildContainer
                     throw new \Exception($this->namespace.": Class '{$class}' not found as a Service.");
 
                 $instance = new $class;
+
+                if (is_string($name) && $instance instanceof iContainerService)
+                    $instance->setName($name);
             }
 
             ## Inject Dependencies:
@@ -305,5 +392,14 @@ class BuildContainer
 
             $container->set($instance);
         }
+    }
+
+    function _importValueTo(&$array, $data)
+    {
+        if (is_array($data) && array_values($data) !== $data)
+            // assoc array
+            $array = array_merge_recursive($array, $data);
+        else
+            array_push($array, $data);
     }
 }
