@@ -7,6 +7,8 @@ use Poirot\Std\Interfaces\Struct\iData;
 class ServiceInstance
     extends aServiceContainer
 {
+    const KEY_OPTIONS = 'options';
+    
     protected $service;
 
     /**
@@ -33,7 +35,8 @@ class ServiceInstance
     /**
      * Create Service
      *
-     * @return mixed
+     * @return object
+     * @throws \Exception
      */
     function newService()
     {
@@ -58,20 +61,26 @@ class ServiceInstance
                 }
 
                 // let remind options used as features like configurable
-                $argsAvailable = @array_diff($argsAvailable, $resolved);
+                // TODO array_diff not work with multidimensional array; implement in stdArray
+                // $argsAvailable = array_diff($argsAvailable, $resolved);
+
+                if ($argsAvailable) {
+                    if ($service instanceof ipConfigurable)
+                        ## using Pact Options Provider Contract
+                        $service->with($argsAvailable);
+                    elseif ($service instanceof iData)
+                        $service->import($argsAvailable);
+                }
+
             } elseif ($this->services()->has($service)) {
-                $service = $this->services()->fresh($service);
+                $service = $this->services()->fresh($service, $argsAvailable);
+            } else {
+                throw new \Exception(sprintf(
+                    'Service (%s) is not Class Neither Registered Service.', $service
+                ));
             }
         }
 
-        if ($argsAvailable) {
-            if ($service instanceof ipConfigurable)
-                ## using Pact Options Provider Contract
-                $service->with($argsAvailable);
-            elseif ($service instanceof iData)
-                $service->import($argsAvailable);
-        }
-        
         return $service;
     }
 
