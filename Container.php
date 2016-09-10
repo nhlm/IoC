@@ -504,7 +504,7 @@ class Container
         if (isset($this->__nestRight[$cNamespace]))
             throw new \InvalidArgumentException(sprintf(
                 'Namespace (%s) is exists on container:%s'
-                , $namespace , $this->getName()
+                , $namespace , $this->getPath()
             ));
 
         $nestedCnt = $container;
