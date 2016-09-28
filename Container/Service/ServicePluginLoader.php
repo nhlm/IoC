@@ -89,7 +89,7 @@ class ServicePluginLoader
      *
      * @return $this
      */
-    function by($serviceName)
+    function newService($serviceName)
     {
         $this->currentService = $serviceName;
         return $this;
