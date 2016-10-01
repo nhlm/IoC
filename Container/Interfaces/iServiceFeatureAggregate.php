@@ -8,6 +8,7 @@ namespace Poirot\Ioc\Container\Interfaces;
  * :canCreate then 
  */
 interface iServiceFeatureAggregate
+    extends iContainerService
 {
     /**
      * Determine Which Can Create Service With Given Name?
@@ -20,26 +21,14 @@ interface iServiceFeatureAggregate
 
     /**
      * Set Create Service Method Respond To This Service
-     * 
-     * @param string $serviceName
-     * 
-     * @return $this
-     */
-    function by($serviceName);
-
-    /**
-     * Create Service
+     *
+     * note: when with service called ::newService() will return
+     *       mentioned service only and current state can only change with another
+     *       call to this method and request for another service
      *
      * @param string $serviceName
      * 
-     * @return mixed
+     * @return iContainerService
      */
-    function newService($serviceName = null);
-
-    /**
-     * Get Last Created Service
-     * 
-     * @return mixed|null
-     */
-    function getLastCreatedService();
+    function withServiceName($serviceName = null);
 }

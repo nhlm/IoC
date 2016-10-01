@@ -180,7 +180,7 @@ class Container
         // ..
 
         $name  = $service->getName();
-        if ($this->has($name) && !$this->_attainCService($name)->isAllowOverride())
+        if ($name !== null && $this->has($name) && !$this->_attainCService($name)->isAllowOverride())
             throw new \Exception(
                 "A service by the name or alias ({$name}) already exists and cannot be overridden;"
             );
@@ -652,7 +652,7 @@ class Container
             /** @var iServiceFeatureAggregate $inService */
             foreach ($this->services_aggregate as $inService)
                 if ($inService->canCreate($name))
-                    return $inService->by($name);
+                    return $inService->withServiceName($name);
         }
 
         return $return;
