@@ -21,6 +21,8 @@ use Poirot\Ioc\Container\Interfaces\iContainerService;
 class BuildContainer
     extends ConfigurableSetter
 {
+    const INST = '_class_';
+
     protected $namespace;
     protected $services        = array();
     protected $extends         = array();
@@ -336,11 +338,11 @@ class BuildContainer
                 // [ 'Path\To\ServiceImplementation' => [':name' => 'serviceName', 'setter' => 'value' ..,
                 $class = $key;
 
-                if (array_key_exists(':class', $v)) {
+                if (array_key_exists(self::INST, $v)) {
                     // [ 'service_name' => [ ':class' => ...
                     $v[':name'] = $key;
-                    $class = $v[':class'];
-                    unset($v[':class']);
+                    $class = $v[self::INST];
+                    unset($v[self::INST]);
                 }
 
                 if (array_key_exists(':name', $v)) {
@@ -372,7 +374,7 @@ class BuildContainer
                 // [ 'Path\To\ServiceImplementation',
                 // [ 'env' => P\Std\Environment\EnvDevelopment::class,
                 if (!class_exists($class))
-                    throw new \Exception($this->namespace.": Class '{$class}' not found as a Service.");
+                    throw new \Exception("Class '{$class}' not found as a Service.");
 
                 // TODO code clone from ServiceInstance
                 $rClass   = new \ReflectionClass($class);

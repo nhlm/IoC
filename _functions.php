@@ -73,7 +73,7 @@ namespace Poirot\Ioc
 {
     use Poirot\Ioc\Container\Service\ServiceInstance;
 
-    const INIT_INS = '_class_';
+    const INST = '_class_';
 
 
     /**
@@ -137,7 +137,7 @@ namespace Poirot\Ioc
 
         foreach ($config as $key => $value)
         {
-            if ($key === INIT_INS)
+            if ($key === INST)
             {
                 // instance object from _class_ config definition
                 // 'key' => [ \Poirot\Config\INIT_INS => '\ClassName' | ['\ClassName', 'options' => $options] ]
