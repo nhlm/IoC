@@ -87,7 +87,7 @@ class ServiceInstance
     /**
      * @param mixed $class
      */
-    public function setService($class)
+    function setService($class)
     {
         $this->service = $class;
     }

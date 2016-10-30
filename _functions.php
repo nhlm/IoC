@@ -71,12 +71,15 @@ namespace
 
 namespace Poirot\Ioc
 {
+    use Poirot\Ioc\Container\Service\ServiceInstance;
+
     const INIT_INS = '_class_';
 
+
     /**
-     * Instantiate Initialized From Config Data.
+     * New Initialized Instantiate From Array
      *
-     * if services(ioc) not given using default Poirot\ioc() then:
+     * if services(ioc) not given using default IoC then:
      *   - make object instance from definition data structure
      *   - inject dependencies
      *   - initialize services
@@ -152,7 +155,7 @@ namespace Poirot\Ioc
                 // easy to debug track of service if failed; replace separator container "/" with "_" to avoid container service retrieve error
                 $postfix      = '_'.str_replace('/', '_', \Poirot\Std\flatten($class));
                 $service_name = uniqid().$postfix;
-                $inService    = new Container\Service\ServiceInstance();
+                $inService    = new ServiceInstance();
                 $inService->setName($service_name);
                 $inService->setService($class);
                 $inService->with($value);
