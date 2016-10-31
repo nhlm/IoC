@@ -22,6 +22,7 @@ class BuildContainer
     extends ConfigurableSetter
 {
     const INST = '_class_';
+    const NAME = ':name';
 
     protected $namespace;
     protected $services        = array();
@@ -340,14 +341,14 @@ class BuildContainer
 
                 if (array_key_exists(self::INST, $v)) {
                     // [ 'service_name' => [ ':class' => ...
-                    $v[':name'] = $key;
+                    $v[self::NAME] = $key;
                     $class = $v[self::INST];
                     unset($v[self::INST]);
                 }
 
-                if (array_key_exists(':name', $v)) {
-                    $name = $v[':name'];
-                    unset($v[':name']);
+                if (array_key_exists(self::NAME, $v)) {
+                    $name = $v[self::NAME];
+                    unset($v[self::NAME]);
                 }
 
                 if (!class_exists($class) && strstr($class, '\\') === false) {
