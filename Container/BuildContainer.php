@@ -10,13 +10,6 @@ use Poirot\Ioc\Container\Service\ServiceInstance;
 use Poirot\Ioc\Container\Interfaces\iContainerInitializer;
 use Poirot\Ioc\Container\Interfaces\iContainerService;
 
-/**
- * Changes:
- * 
- *   - enable builder save current values of class variable
- *     exp. $services = [ 'GrantResponder' => \Module\OAuth2\Services\ServiceGrantResponder::class ]
- * 
- */
 
 class BuildContainer
     extends ConfigurableSetter
@@ -25,7 +18,9 @@ class BuildContainer
     const NAME = ':name';
 
     protected $namespace;
-    protected $services        = array();
+    protected $services        = array(
+        # 'GrantResponder' => \Module\OAuth2\Services\ServiceGrantResponder::class
+    );
     protected $extends         = array();
     protected $initializers    = array();
     protected $nested          = array();
@@ -424,7 +419,7 @@ class BuildContainer
     {
         if (is_array($data) && array_values($data) !== $data)
             // assoc array
-            $array = array_merge_recursive($array, $data);
+            $array = array_merge($array, $data);
         else
             array_push($array, $data);
     }

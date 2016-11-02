@@ -135,7 +135,14 @@ class Container
         if (is_object($implement))
             $implement = get_class($implement);
 
+        if (!is_string($implement))
+            throw new \InvalidArgumentException(sprintf(
+                'Unknown Implementation Definition; given (%s).'
+                , \Poirot\Std\flatten($implement)
+            ));
+
         $nameOrAlias = $this->_normalizeName($nameOrAlias);
+
         $this->implementations[$nameOrAlias] = trim($implement, '\\'); // trim [\]Poirot\Classes
         return $this;
     }
