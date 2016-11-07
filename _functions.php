@@ -17,6 +17,8 @@ namespace
      *
      *   $ioc->from('/Module/Categories/Services/Repository')->get('categories');
      *
+     *   - Invokable/callable services will resolve with given arguments and executed
+     *     so the final result is not a service but result of invoked callable.
      */
     class IOC
     {
@@ -37,6 +39,10 @@ namespace
                 $service = $container->get($name, $arguments);
             else
                 $service = $container->get($name);
+
+            # Invoke Callable With Arguments
+            if (is_callable($service))
+                $service = call_user_func_array($service, $arguments);
 
             return $service;
         }
