@@ -281,27 +281,36 @@ class BuildContainer
 
     protected function _buildNested(Container $container)
     {
-        foreach($this->nested as $namespace => $nest) 
+        foreach($this->nested as $namespace => $nestedOptions)
         {
             if (!is_string($namespace))
                 ## nested as options [options, ..]
-                $namespace = $nest->getName();
+                $namespace = $nestedOptions->getName();
 
             $namespace = (string) $namespace;
 
             if (false === $hasNested = $container->from($namespace)) {
-                if (is_array($nest))
-                    $nest = new Container(new BuildContainer($nest));
+                if (is_array($nestedOptions)) {
+                    /// Using same container as parent while nesting ....
+                    //- when nestedOptions is settings array
+                    $nest = get_class($container);
+                    $nest = new $nest;
+
+                    $builder = new BuildContainer($nestedOptions);
+                    $builder->build($nest);
+                } else
+                    $nest = $nestedOptions;
 
                 $container->nest($nest, $namespace);
+
             } else {
-                if (!is_array($nest))
+                if (!is_array($nestedOptions))
                     throw new \InvalidArgumentException(sprintf(
                         'Nested container (%s) is exists and cant be override; instead use builder array.'
                         , $namespace
                     ));
 
-                $builder = new BuildContainer($nest);
+                $builder = new BuildContainer($nestedOptions);
                 $builder->build($hasNested);
             }
         }
