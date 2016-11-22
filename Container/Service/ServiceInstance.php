@@ -4,6 +4,7 @@ namespace Poirot\Ioc\Container\Service;
 use Poirot\Std\Interfaces\Pact\ipConfigurable;
 use Poirot\Std\Interfaces\Struct\iData;
 
+
 class ServiceInstance
     extends aServiceContainer
 {
@@ -49,7 +50,6 @@ class ServiceInstance
                 $argsAvailable = \Poirot\Std\cast($this->optsData())->toArray();
                 $rClass   = new \ReflectionClass($service);
 
-                $resolved = array();
                 if ($rClass->hasMethod('__construct')) {
                     // Resolve Arguments to constructor and create new instance
                     $rMethod  = $rClass->getMethod('__construct');
