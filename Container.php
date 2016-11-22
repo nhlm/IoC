@@ -522,6 +522,16 @@ class Container
     }
 
     /**
+     * List Nested Containers By Name
+     *
+     * @return []string
+     */
+    function listNested()
+    {
+        return array_keys($this->__nestRight);
+    }
+
+    /**
      * Retrieve Nested Container
      *
      * [code:]
