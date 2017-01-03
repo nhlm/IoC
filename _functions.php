@@ -55,7 +55,8 @@ namespace
         static function GetIoC()
         {
             if (!self::$_IOC)
-                self::GiveIoC(new Container);
+                // Don't give IoC as Default
+                return new Container;
 
             return self::$_IOC;
         }
@@ -79,7 +80,7 @@ namespace Poirot\Ioc
 {
     use Poirot\Ioc\Container\Service\ServiceInstance;
 
-    const INST = '_class_';
+    const INST = ':instance';
 
 
     /**
