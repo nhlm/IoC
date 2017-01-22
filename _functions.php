@@ -76,12 +76,52 @@ namespace
     }
 }
 
+
+/*
+class test {
+    protected $sapi;
+    function __construct($registeredServiceByName)
+    {
+        $this->s = $registeredServiceByName;
+    }
+}
+
+$classTest = P\Ioc\newInitIns(new P\Ioc\instance(test::class));
+*/
 namespace Poirot\Ioc
 {
     use Poirot\Ioc\Container\Service\ServiceInstance;
 
     const INST = ':instance';
 
+
+    /**
+     * Data Transfer for Initialized Instance Method
+     * @see newInitIns()
+     */
+    class instance implements \IteratorAggregate {
+        protected $instanceOf;
+        protected $options;
+
+        function __construct($instanceOf, array $options = null)
+        {
+            $this->instanceOf = $instanceOf;
+            $this->options    = $options;
+        }
+
+        function getIterator()
+        {
+            $conf = array(
+                $this->instanceOf,
+            );
+
+            (empty($this->options)) ?: array_merge($conf, array('options' => $this->options));
+
+            return new \ArrayIterator(array(
+                INST => $conf,
+            ));
+        }
+    }
 
     /**
      * New Initialized Instantiate From Array
@@ -148,7 +188,7 @@ namespace Poirot\Ioc
             {
                 // instance object from _class_ config definition
                 // 'key' => [ \Poirot\Config\INIT_INS => '\ClassName' | ['\ClassName', 'options' => $options] ]
-                if (is_array($value))
+                if (is_array($value) || $value instanceof instance)
                     // Maybe Options Contains Initialized Definition
                     $value = newInitIns($value, $services);
                 elseif (is_string($value))

@@ -12,14 +12,18 @@ class ServiceInstance
     
     protected $service;
 
+
     /**
      * Construct
      *
      * also can used as:
-     * - new InstanceService('name', $service);
-     * - new InstanceService('name', [ 'service' => [..] ..options]);
-     * or setter set
-     * - new InstanceService([ 'service' => [..] ..options])
+     *   - new ServiceInstance('name', $service);
+     *   - new ServiceInstance('name', [ 'service' => [..] ..options]);
+     *     or setter set
+     *   - new ServiceInstance([ 'service' => [..] ..options])
+     *
+     *   $service can be any type
+     *   string consider class name or either registered service
      *
      * @param array|mixed $nameOrSetter
      * @param array       $setter
@@ -45,14 +49,25 @@ class ServiceInstance
 
         $argsAvailable = \Poirot\Std\cast($this->optsData())->toArray();
 
-        if(is_string($service)) {
+        if (is_string($service)) {
             if (class_exists($service)) {
                 $argsAvailable = \Poirot\Std\cast($this->optsData())->toArray();
-                $rClass   = new \ReflectionClass($service);
+                $rClass        = new \ReflectionClass($service);
 
                 if ($rClass->hasMethod('__construct')) {
                     // Resolve Arguments to constructor and create new instance
                     $rMethod  = $rClass->getMethod('__construct');
+
+                    ## look for arguments as registered service ioc name
+                    $argsAsService = array();
+                    foreach ($rMethod->getParameters() as $reflectionParameter) {
+                        $paramName = $reflectionParameter->getName();
+                        if ($this->services()->has($paramName))
+                            $argsAsService[$reflectionParameter->getName()] = $this->services()->get($paramName);
+                    }
+
+                    $argsAvailable = array_merge($argsAsService, $argsAvailable);
+
                     $resolved = \Poirot\Std\Invokable\resolveArgsForReflection($rMethod, $argsAvailable);
                     $service  = $rClass->newInstanceArgs($resolved);
                 } else {
@@ -72,13 +87,8 @@ class ServiceInstance
                         $service->import($argsAvailable);
                 }
 
-            } elseif ($this->services()->has($service)) {
+            } elseif ($this->services()->has($service))
                 $service = $this->services()->fresh($service, $argsAvailable);
-            } else {
-                throw new \Exception(sprintf(
-                    'Service (%s) is not Class Neither Registered Service.', $service
-                ));
-            }
         }
 
         return $service;
