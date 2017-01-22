@@ -30,6 +30,12 @@ class ServiceInstance
      */
     function __construct($nameOrSetter = null, $setter = array())
     {
+        // TODO fix
+        /*$instance = new ServiceInstance($name, array(
+            'service' => $instance,
+            'options' => $options,
+        ));*/
+
         if (is_string($nameOrSetter) && !is_array($setter))
             ## new InstanceService('name', $service)
             $setter = array('service' => $setter);

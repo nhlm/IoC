@@ -417,7 +417,12 @@ class BuildContainer
                         , $this->namespace, $key, $v
                     ));
 
-                $instance = new ServiceInstance($name, $instance);
+                // TODO not pass as options
+                $instance = new ServiceInstance(array(
+                    'name'    => $name,
+                    'service' => $instance,
+                    'options' => $options,
+                ));
             }
 
             $container->set($instance);
