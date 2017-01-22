@@ -372,41 +372,41 @@ class BuildContainer
                 $name    = $key;
             }
 
-            if (is_object($class))
-                // [ new ServiceFactory('serviceName', $callable),
-                $instance = $class;
-            else {
+            // [ new ServiceFactory('serviceName', $callable),
+            $instance = $class;
+
+            if (!is_object($class))
+            {
                 // [ 'Path\To\ServiceImplementation',
                 // [ 'env' => P\Std\Environment\EnvDevelopment::class,
                 if (!class_exists($class))
-                    throw new \Exception("Class '{$class}' not found as a Service.");
+                    throw new \Exception("Class '{$class}' not found to build service '{$name}'.");
 
-                // TODO code clone from ServiceInstance
-                $rClass   = new \ReflectionClass($class);
-                if ($rClass->hasMethod('__construct')) {
-                    // Resolve Arguments to constructor and create new instance
-                    $rMethod  = $rClass->getMethod('__construct');
-                    $resolved = \Poirot\Std\Invokable\resolveArgsForReflection($rMethod, $options);
-                    $instance  = $rClass->newInstanceArgs($resolved);
+                $rClass = new \ReflectionClass($class);
+                if ($rClass->implementsInterface('Poirot\Ioc\Container\Interfaces\iContainerService')) {
+                    if ($rClass->hasMethod('__construct')) {
+                        // Resolve Arguments to constructor and create new instance
+                        $rMethod  = $rClass->getMethod('__construct');
+                        $resolved = \Poirot\Std\Invokable\resolveArgsForReflection($rMethod, $options, false);
+                        $instance  = $rClass->newInstanceArgs($resolved);
 
-                    // let remind options used as features like configurable
-                    // $options = @array_diff($options, $resolved);
-                } else {
-                    // service without constructor
-                    $instance = new $class;
-                }
+                        // let remind options used as features like configurable
+                        // $options = @array_diff($options, $resolved);
+                    } else {
+                        // service without constructor
+                        $instance = new $class;
+                    }
 
-                if (is_string($name) && $instance instanceof iContainerService)
+                    ## Inject Dependencies:
+                    if ($instance instanceof ipOptionsProvider && !empty($options))
+                        $instance->optsData()->import($options);
+
+                    if ($instance instanceof ipConfigurable && !empty($options))
+                        $instance->with($options);
+
                     $instance->setName($name);
+                }
             }
-
-            ## Inject Dependencies:
-            // TODO can implemented with initializer set by Default Initializer Static
-            if ($instance instanceof ipOptionsProvider && !empty($options))
-                $instance->optsData()->import($options);
-
-            if ($instance instanceof ipConfigurable && !empty($options))
-                $instance->with($options);
 
             ## Instance Service helper:
             if (!$instance instanceof iContainerService) {

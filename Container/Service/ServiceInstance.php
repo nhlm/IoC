@@ -79,16 +79,19 @@ class ServiceInstance
                 // TODO array_diff not work with multidimensional array; implement in stdArray
                 // $argsAvailable = array_diff($argsAvailable, $resolved);
 
-                if ($argsAvailable) {
-                    if ($service instanceof ipConfigurable)
-                        ## using Pact Options Provider Contract
-                        $service->with($argsAvailable);
-                    elseif ($service instanceof iData)
-                        $service->import($argsAvailable);
-                }
-
-            } elseif ($this->services()->has($service))
+            }
+            elseif ($this->services()->has($service)) {
                 $service = $this->services()->fresh($service, $argsAvailable);
+                $argsAvailable = null;
+            }
+        }
+
+        if ($argsAvailable) {
+            if ($service instanceof ipConfigurable)
+                ## using Pact Options Provider Contract
+                $service->with($argsAvailable);
+            elseif ($service instanceof iData)
+                $service->import($argsAvailable);
         }
 
         return $service;
