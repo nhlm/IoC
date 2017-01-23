@@ -60,25 +60,23 @@ class ServiceInstance
                 $argsAvailable = \Poirot\Std\cast($this->optsData())->toArray();
                 $rClass        = new \ReflectionClass($service);
 
-                if ($rClass->hasMethod('__construct')) {
+                if ($rClass->hasMethod('__construct'))
+                {
                     // Resolve Arguments to constructor and create new instance
-                    $rMethod  = $rClass->getMethod('__construct');
-
-                    ## look for arguments as registered service ioc name
-                    $argsAsService = array();
-                    foreach ($rMethod->getParameters() as $reflectionParameter) {
-                        $paramName = $reflectionParameter->getName();
-                        if ($this->services()->has($paramName))
-                            $argsAsService[$reflectionParameter->getName()] = $this->services()->get($paramName);
-                    }
+                    $argsAsService = $this->_resolveServicesAsArgument($rClass);
 
                     $argsAvailable = array_merge($argsAsService, $argsAvailable);
 
+                    $rMethod  = $rClass->getMethod('__construct');
                     $resolved = \Poirot\Std\Invokable\resolveArgsForReflection($rMethod, $argsAvailable);
                     $service  = $rClass->newInstanceArgs($resolved);
-                } else {
+
+                }
+                else
+                {
                     // service without constructor
                     $service = new $service;
+
                 }
 
                 // let remind options used as features like configurable
@@ -109,6 +107,79 @@ class ServiceInstance
     function setService($class)
     {
         $this->service = $class;
+    }
+
+
+    // ..
+
+    protected function _resolveServicesAsArgument(\ReflectionClass $rClass)
+    {
+        $rMethod  = $rClass->getMethod('__construct');
+        $mapServices = $this->__makeMapOfArgumentToService($rMethod->getDocComment());
+
+        ## look for arguments as registered service ioc name
+        $argsAsService = array();
+        foreach ($rMethod->getParameters() as $reflectionParameter)
+        {
+            // look for argument as a service in current ioc domain(iCServiceAware injected)
+            $service = $reflectionParameter->getName();
+
+            if ( isset($mapServices[$service]) ) {
+                // look for service from DocComment Block Definition
+                $service_path = $mapServices[$service]['service'];
+                if ($service_path) {
+                    if (substr($service_path, -1) == '/')
+                        // /module/oauth2/services/[x]<- !! resolve argument name here
+                        // append argument as service name with given path
+                        $service = $service_path.$service;
+                    else
+                        // /module/oauth2/services/grantResponder
+                        // whole path to resolve service for argument name is given
+                        $service = $service_path;
+                } else
+                    // service in current ioc domain, don't prefixed argument
+                    VOID;
+            }
+
+            if ($this->services()->has($service))
+                $argsAsService[$service] = $this->services()->get($service);
+        }
+
+
+        return $argsAsService;
+    }
+
+    private function __makeMapOfArgumentToService($getDocComment)
+    {
+        $mapServices = array();
+        if (empty($getDocComment))
+            // Nothing To Do !!!
+            return $mapServices;
+
+        /**
+         * constructor.
+         *
+         * @param GrantAggregateGrants      $grantResponder       @IoC /module/oauth2/services/grantResponder
+         * @param GrantAggregateGrants      $grantResponder       @IoC /module/oauth2/services/[x]<- !! resolve argument name here
+         * @param iRepoUsersApprovedClients $RepoApprovedClients  @IoC /module/oauth2/services/repository/Users.ApprovedClients
+         * @param $RepoApprovedClients                            @IoC /module/oauth2/services/repository/Users.ApprovedClients
+         * @param iRepoUsersApprovedClients $UsersApprovedClients !! when ioc not present try to retrieve from current services() instance
+         *                                                        !! resolve argument name here
+         * @param $RepoApprovedClients                            @IoC from/current/domain/path !! resolve relative from current domain ioc
+         */
+        $regex = '/(@param\s*)(?P<type_hint>[\w\|]+\s*|)(?P<name>[$\w\|]+\s*)(@IoC\s*|)(?P<service_path>[\w\\/._-]+\s*|)/';
+        if (preg_match_all($regex, $getDocComment, $matches)) {
+            foreach ($matches['name'] as $i => $argument) {
+                $argumentName = ltrim(trim($argument), '$');
+                $servicePath  = $matches['service_path'][$i];
+                $typeHint     = $matches['type_hint'][$i];
+
+                $mapServices[$argumentName]['service'] = trim($servicePath);
+                $mapServices[$argumentName]['type']    = trim($typeHint);
+            }
+        }
+
+        return $mapServices;
     }
 }
 
