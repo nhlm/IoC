@@ -404,7 +404,8 @@ class BuildContainer
                     if ($instance instanceof ipConfigurable && !empty($options))
                         $instance->with($options);
 
-                    $instance->setName($name);
+                    // set name if given otherwise use ::getName method of iCService
+                    (!$name) ?: $instance->setName($name);
                 }
             }
 
