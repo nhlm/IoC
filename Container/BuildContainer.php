@@ -418,7 +418,7 @@ class BuildContainer
                         , $this->namespace, $key, $v
                     ));
 
-                // TODO not pass as options
+                // TODO avoid construct with options; instead use setter methods
                 $instance = new ServiceInstance(array(
                     'name'    => $name,
                     'service' => $instance,
