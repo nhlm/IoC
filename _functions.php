@@ -115,7 +115,7 @@ namespace Poirot\Ioc
                 $this->instanceOf,
             );
 
-            (empty($this->options)) ?: array_merge($conf, array('options' => $this->options));
+            (empty($this->options)) ?: $conf = array_merge($conf, array('options' => $this->options));
 
             return new \ArrayIterator(array(
                 INST => $conf,
