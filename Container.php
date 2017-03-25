@@ -330,13 +330,13 @@ class Container
 
         if (!$this->has($nameOrAlias))
             throw new exContainerNoService(sprintf(
-                '%s (%s) was requested but no service could be found.'
+                '%s (%s) was requested in Container@%s but no service could be found.'
                 , ($nameOrAlias !== $orgName)
-                    ? "Service ($nameOrAlias) with alias"
-                    : 'Service'
+                ? "Service ($nameOrAlias) with alias"
+                : 'Service'
                 , $orgName
+                , $this->getPath()
             ));
-
 
         # Attain Service Instance:
         $inService = $this->_attainCService($nameOrAlias);
