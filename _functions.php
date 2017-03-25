@@ -25,6 +25,14 @@ namespace
         /** @var Container */
         protected static $_IOC;
 
+        function __construct(Container $container = null)
+        {
+            if (!$container)
+                $container = static::GetIoC();
+
+            $this->container = $container;
+        }
+
         static function __callStatic($name, $arguments)
         {
             $class     = get_class(new static);
@@ -45,6 +53,38 @@ namespace
                 $service = call_user_func_array($service, $arguments);
 
             return $service;
+        }
+
+        // ..
+
+        /**
+         * To Retrieve Registered Services Itself
+         *
+         * exp.
+         * callable IOC::$AssertToken
+         * instead execute callable and return result
+         *
+         * @param $name
+         *
+         * @return mixed
+         */
+        function __get($name)
+        {
+            $service = $this->container->get($name);
+            return $service;
+        }
+
+        static function instance()
+        {
+            $class     = get_class(new static);
+            $namespace = substr($class, 0, strrpos($class, '\\'));
+            $nested    = str_replace('\\', Container::SEPARATOR, $namespace);
+            $container = self::GetIoC()->from($nested);
+
+            if (!$container)
+                throw new \Exception(sprintf('Nested Container (%s) not included.', $nested));
+
+            return new static($container);
         }
 
         /**
