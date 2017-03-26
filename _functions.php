@@ -238,6 +238,12 @@ namespace Poirot\Ioc
                         'Invalid instanceInitialized Config (%s).', \Poirot\Std\flatten($value)
                     ));
 
+
+                if (is_object($value))
+                    // Value is initialized within above if condition when array or instance give
+                    return $config = $value;
+
+
                 $class        = array_shift($value);
                 // easy to debug track of service if failed; replace separator container "/" with "_" to avoid container service retrieve error
                 $postfix      = '_'.str_replace('/', '_', \Poirot\Std\flatten($class));
