@@ -74,7 +74,7 @@ namespace
             return $service;
         }
 
-        static function instance()
+        static function bareService()
         {
             $class     = get_class(new static);
             $namespace = substr($class, 0, strrpos($class, '\\'));
