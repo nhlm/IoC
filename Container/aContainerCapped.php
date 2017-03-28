@@ -1,10 +1,9 @@
 <?php
 namespace Poirot\Ioc\Container;
 
-use Poirot\Loader\LoaderMapResource;
-
 use Poirot\Ioc\Container;
 use Poirot\Ioc\Container\Exception\exContainerInvalidServiceType;
+
 
 /**
  * Container that extends Capped Container

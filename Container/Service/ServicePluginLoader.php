@@ -2,13 +2,15 @@
 namespace Poirot\Ioc\Container\Service;
 
 use Poirot\Ioc\Container\Interfaces\iServiceFeatureAggregate;
+use Poirot\Ioc\instance;
 use Poirot\Loader\Interfaces\iLoader;
 use Poirot\Loader\Interfaces\Respec\iLoaderAware;
 use Poirot\Loader\LoaderAggregate;
 use Poirot\Loader\LoaderMapResource;
 
+
 class ServicePluginLoader
-    extends aServiceContainer
+    extends aServiceAggregate
     implements iServiceFeatureAggregate
     , iLoaderAware
 {
@@ -35,13 +37,14 @@ class ServicePluginLoader
      * @var boolean
      */
     protected $allowOverride = true;
-    
+
+
     /**
      * ServicePluginLoader constructor.
      * @param array|string $nameOsetter
      * @param array        $setter
      */
-    function __construct($nameOsetter, array $setter)
+    function __construct($nameOsetter, array $setter = array())
     {
         // Arrange Setter Priorities
         $this->putBuildPriority(array(
@@ -51,24 +54,6 @@ class ServicePluginLoader
 
         parent::__construct($nameOsetter, $setter);
     }
-
-    /**
-     * Default Loader Resolver
-     *
-     * @return LoaderAggregate
-     */
-    static function Loader()
-    {
-        if (!self::$default_resolver) {
-            $resolver = new LoaderAggregate();
-            $resolver->attach(new LoaderMapResource(), 100);
-            self::$default_resolver = $resolver;
-        }
-
-        return self::$default_resolver;
-    }
-
-    // --
 
     /**
      * Determine Which Can Create Service With Given Name?
@@ -83,36 +68,26 @@ class ServicePluginLoader
     }
 
     /**
-     * Set Create Service Method Respond To This Service
-     *
-     * @param string $serviceName
-     *
-     * @return $this
-     */
-    function newService($serviceName)
-    {
-        $this->currentService = $serviceName;
-        return $this;
-    }
-    
-    /**
      * Create Service
-     * 
+     *
      * @param string $serviceName
      *
      * @return mixed
+     * @throws \Exception
      */
     function newService($serviceName = null)
     {
-        // TODO it can be improved
-
         ($serviceName) ?: $serviceName = $this->currentService;
+        if ($serviceName === null)
+            throw new \Exception('Service name is empty; use ::withService() method.');
 
 
-        $service = $this->_resolver->resolve($serviceName);
+        if (false === $service = $this->_resolveTo($serviceName))
+            throw new \Exception(sprintf('Cant Resolve To Plugin Service (%s).', $serviceName));
 
-        if (is_string($service) && class_exists($service))
-            $service = new $service();
+        if ( is_string($service) && class_exists($service) )
+            // Resolved Class Name
+            $service = \Poirot\Ioc\newInitIns(new instance($service));
 
         return $service;
     }
@@ -126,6 +101,7 @@ class ServicePluginLoader
     {
         return $this->lastCreatedService;
     }
+
 
     // iLoaderAware
 
@@ -142,6 +118,7 @@ class ServicePluginLoader
         $this->_resolver = $resolver;
         return $this;
     }
+
 
     // Options:
 
@@ -166,8 +143,28 @@ class ServicePluginLoader
     {
         throw new \Exception('Override services is always granted.');
     }
-    
+
+
+
     // ..
+
+
+    /**
+     * Default Loader Resolver
+     *
+     * @return LoaderAggregate
+     */
+    static function Loader()
+    {
+        if (!self::$default_resolver) {
+            $resolver = new LoaderAggregate;
+            $resolver->attach(new LoaderMapResource, 100);
+            self::$default_resolver = $resolver;
+        }
+
+        return self::$default_resolver;
+    }
+
 
     /** @return iLoader */
     protected function _resolver()
