@@ -379,8 +379,10 @@ class BuildContainer
             {
                 // [ 'Path\To\ServiceImplementation',
                 // [ 'env' => P\Std\Environment\EnvDevelopment::class,
-                if (!class_exists($class))
+                if (!class_exists($class)) {
+                    (!is_int($name)) ?: $name = 'no-name (iCService)';
                     throw new \Exception("Class '{$class}' not found to build service '{$name}'.");
+                }
 
                 $rClass = new \ReflectionClass($class);
                 if ($rClass->implementsInterface('Poirot\Ioc\Container\Interfaces\iContainerService')) {
