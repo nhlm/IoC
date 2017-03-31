@@ -2,7 +2,6 @@
 namespace Poirot\Ioc\Container\Service;
 
 use Poirot\Std\ConfigurableSetter;
-use Poirot\Std\Struct\aDataOptions;
 use Poirot\Std\Struct\DataOptionsOpen;
 use Poirot\Std\Interfaces\Struct\iDataOptions;
 use Poirot\Ioc\Container;
@@ -210,14 +209,14 @@ abstract class aServiceContainer
     /**
      * Build Object With Provided Options
      *
-     * @param array|\Traversable $options        Associated Array
-     * @param bool               $throwException Throw Exception On Wrong Option
+     * @param array $options        Associated Array
+     * @param bool  $throwException Throw Exception On Wrong Option
      *
      * @return array Remained Options (if not throw exception)
      * @throws \Exception
      * @throws \InvalidArgumentException
      */
-    function with($options, $throwException = true)
+    function with(array $options, $throwException = true)
     {
         return parent::with($options, $throwException);
     }
