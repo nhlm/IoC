@@ -56,8 +56,8 @@ class ServiceInstance
         $argsAvailable = \Poirot\Std\cast($this->optsData())->toArray();
 
         if (is_string($service)) {
-            if (class_exists($service)) {
-                $argsAvailable = \Poirot\Std\cast($this->optsData())->toArray();
+            if (class_exists($service))
+            {
                 $rClass        = new \ReflectionClass($service);
 
                 if ($rClass->hasMethod('__construct'))
@@ -140,6 +140,7 @@ class ServiceInstance
                     // service in current ioc domain, don't prefixed argument
                     VOID;
             }
+
 
             if ($this->services()->has($service))
                 $argsAsService[$service] = $this->services()->get($service);

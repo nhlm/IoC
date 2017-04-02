@@ -407,14 +407,14 @@ class BuildContainer
                         $instance->with($options);
 
                     // set name if given otherwise use ::getName method of iCService
-                    (!$name) ?: $instance->setName($name);
+                    (is_int($name)) ?: $instance->setName($name);
                 }
             }
 
             ## Instance Service helper:
             if (!$instance instanceof iContainerService) {
                 // [ new ServiceFactory('serviceName', $callable),
-                if (empty($name))
+                if (empty($name) || is_int($name))
                     throw new \InvalidArgumentException(sprintf(
                         "%s Service Name '%s' not recognized for (%s)."
                         , $this->namespace, $key, $v
@@ -426,6 +426,13 @@ class BuildContainer
                     'service' => $instance,
                     'options' => $options,
                 ));
+
+                /*
+                 * Fatal error: Maximum function nesting level
+                $instance->setName($name);
+                $instance->setService($instance);
+                $instance->optsData()->import($options);*/
+
             }
 
             $container->set($instance);
