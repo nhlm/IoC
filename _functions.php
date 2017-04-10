@@ -138,6 +138,13 @@ namespace Poirot\Ioc
     /**
      * Data Transfer for Initialized Instance Method
      *
+     * Note: Iterator Will Convert To
+     *       [
+     *           ':instance' => [
+     *               'options' => $yourGivenOptions
+     *           ]
+     *       ]
+     *
      * $options:
      * [
      *   // Arguments resolve at __construct if given string is a class
@@ -271,7 +278,7 @@ namespace Poirot\Ioc
                 else
                     array_unshift($config, $initialized);
             }
-            elseif (is_array($value))
+            elseif (is_array($value) || $value instanceof instance)
             {
                 $config[$key] = newInitIns($value, $services);
             }
