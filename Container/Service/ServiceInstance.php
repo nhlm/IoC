@@ -80,8 +80,15 @@ class ServiceInstance
                 }
 
                 // let remind options used as features like configurable
-                // TODO array_diff not work with multidimensional array; implement in stdArray
-                // $argsAvailable = array_diff($argsAvailable, $resolved);
+                if (isset($resolved)) {
+                    foreach ($resolved as $key => $value) {
+                        // Remove Resolved From Available Arguments
+                        $key = (string) \Poirot\Std\cast($key)->under_score();
+                        if (!isset($argsAvailable[$key])) continue;
+
+                        unset($argsAvailable[$key]);
+                    }
+                }
 
             }
             elseif ($this->services()->has($service)) {
