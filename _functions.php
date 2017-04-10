@@ -137,6 +137,15 @@ namespace Poirot\Ioc
 
     /**
      * Data Transfer for Initialized Instance Method
+     *
+     * $options:
+     * [
+     *   // Arguments resolve at __construct if given string is a class
+     *   // Service Options while retrieve ::fresh instance if given string is registered service
+     *   // Config Or Data when Instance Is Object instance of Configurable or Data
+     *   'options' => ServiceInstance::setOptions()
+     * ]
+     *
      * @see newInitIns()
      */
     class instance implements \IteratorAggregate {
@@ -254,7 +263,7 @@ namespace Poirot\Ioc
                 $inService->with($value);
 
                 $services->set($inService);
-                $initialized = $services->get($service_name);
+                $initialized = $services->fresh($service_name);
                 unset($config[$key]);
                 if (empty($config))
                     // only definition structure and will convert to instance only
