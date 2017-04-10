@@ -1,9 +1,10 @@
 <?php
-namespace Poirot\Container\Interfaces;
+namespace Poirot\Ioc\Container\Interfaces;
 
-use Poirot\Std\Interfaces\Struct\iOptionsData;
+use Poirot\Std\Interfaces\Pact\ipOptionsProvider;
 
-interface iCService extends iOptionsData
+interface iContainerService
+    extends ipOptionsProvider
 {
     /**
      * Set Service Name
@@ -26,8 +27,11 @@ interface iCService extends iOptionsData
      *
      * @return mixed
      */
-    function createService();
+    function newService();
 
+    
+    // options:
+    
     /**
      * Set Allow Override By Service
      *
@@ -42,5 +46,5 @@ interface iCService extends iOptionsData
      *
      * @return boolean
      */
-    function getAllowOverride();
+    function isAllowOverride();
 }

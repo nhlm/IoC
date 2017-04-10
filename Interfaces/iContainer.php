@@ -1,43 +1,42 @@
 <?php
-namespace Poirot\Container\Interfaces;
+namespace Poirot\Ioc\Interfaces;
 
-use Poirot\Container\Exception\ContainerCreateServiceException;
-use Poirot\Container\Exception\ContainerServNotFoundException;
+use Poirot\Ioc\Exception\exContainerCreateService;
+use Poirot\Ioc\Exception\exContainerNoService;
 
 interface iContainer
 {
     /**
      * Retrieve a registered service
      *
-     * - don't refresh retrieve for services, store-
-     *   service on first request
-     * - if service not exists ::fresh it
+     * !! create service of first retrieve and store it.
+     *    if service not exists self::fresh will call. 
      *
-     * @param string $serviceName Service name
+     * @param string $nameOrAlias Service name
      * @param array  $invOpt      Invoke Options
      *
-     * @throws ContainerCreateServiceException|ContainerServNotFoundException
+     * @throws exContainerCreateService|exContainerNoService
      * @return mixed
      */
-    function get($serviceName, $invOpt = []);
+    function get($nameOrAlias, $invOpt = array());
 
     /**
      * Retrieve a fresh instance of service
      *
-     * @param string $serviceName Service name
+     * @param string $nameOrAlias Service name
      * @param array  $invOpt      Invoke Options
      *
-     * @throws ContainerCreateServiceException|ContainerServNotFoundException
+     * @throws exContainerCreateService|exContainerNoService
      * @return mixed
      */
-    function fresh($serviceName, $invOpt = []);
+    function fresh($nameOrAlias, $invOpt = array());
 
     /**
      * Check for a registered instance
      *
-     * @param string $serviceName Service Name
+     * @param string $nameOrAlias Service Name
      *
      * @return boolean
      */
-    function has($serviceName);
+    function has($nameOrAlias);
 }

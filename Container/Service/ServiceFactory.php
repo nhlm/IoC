@@ -1,7 +1,5 @@
 <?php
-namespace Poirot\Container\Service;
-
-use Poirot\ArgsResolver\ANamedResolver;
+namespace Poirot\Ioc\Container\Service;
 
 /*
  * $container->set(new FunctorService([
@@ -29,7 +27,8 @@ use Poirot\ArgsResolver\ANamedResolver;
  *
  */
 
-class FunctorService extends AbstractService
+class ServiceFactory 
+    extends aServiceContainer
 {
     /**
      * Function Arguments as a Container::get arg. options
@@ -49,22 +48,21 @@ class FunctorService extends AbstractService
      *
      * also can used as:
      * - new FunctorService('name', function() {});
+     * - new FunctorService('name', ['callable' => .. ..options]);
      * or setter set
      * - new FunctorService([ 'callable' => [..] ..options])
      *
-     * @param array|callable $options
-     * @param null|string    $service
+     * @param array|callable $nameOrSetter
+     * @param null|string    $setter
      */
-    function __construct($options = null, $service = null)
+    function __construct($nameOrSetter = array(), $setter = null)
     {
-        if (is_callable($service)) {
-            ## __construct('name', [$this, 'method'])
-            $this->setCallable($service);
-            $this->setName($options);
+        if (is_string($nameOrSetter) && is_callable($setter)) {
+            ## new FunctorService('name', function() {})
+            $setter = array('callable' => $setter);
         }
-        else
-            ## ['callable' => '..', ..]
-            parent::__construct($options);
+        
+        parent::__construct($nameOrSetter, $setter);
     }
 
     /**
@@ -74,13 +72,19 @@ class FunctorService extends AbstractService
      *   so, you can access to methods from FunctorService
      *   from function() { $this->getServiceContainer() }
      *
-     * @param callable $func
+     * @param callable $callable
      *
      * @return $this
      */
-    function setCallable(callable $func)
+    function setCallable(/*callable*/$callable)
     {
-        $this->callable = $func;
+        if (!is_callable($callable))
+            throw new \InvalidArgumentException(sprintf(
+                'Given argument must be a callable. given: %s'
+                , \Poirot\Std\flatten($callable)
+            ));
+        
+        $this->callable = $callable;
         return $this;
     }
 
@@ -89,34 +93,21 @@ class FunctorService extends AbstractService
      *
      * @return mixed
      */
-    function createService()
+    function newService()
     {
         $callable = $this->callable;
-        if ($callable instanceof \Closure)
+        if ($callable === null)
+            ## no callable provided but rather not throw exception
+            return;
+        
+        // ..
+        // DO_LEAST_PHPVER_SUPPORT 5.4 Closure Bind
+        if ($callable instanceof \Closure && version_compare(phpversion(), '5.4.0') > 0)
             $callable = $callable->bindTo($this);
 
-        if (!is_array($this->invoke_options))
-            $this->invoke_options = [$this->invoke_options];
-
         // ...
-
-        $arguments = $this->invoke_options;
-
-        if (class_exists('\Poirot\ArgsResolver\ANamedResolver\ANamedResolver')) {
-            ## Resolve To Callback Arguments From Invoke Options
-            try {
-                $arguments = \Poirot\Std\iterator_to_array(
-                    $this->__getArgsResolver()->bind($callable)
-                        ->resolve($this->invoke_options)
-                );
-            } catch(\Exception $e) { }
-        }
-
-        return call_user_func_array($callable, $arguments);
+        $arguments = $this->optsData();
+        $callable  = \Poirot\Std\Invokable\resolveCallableWithArgs($callable, $arguments);
+        return call_user_func($callable);
     }
-
-        protected function __getArgsResolver()
-        {
-            return new ANamedResolver;
-        }
 }
