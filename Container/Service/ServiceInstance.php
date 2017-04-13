@@ -1,6 +1,7 @@
 <?php
 namespace Poirot\Ioc\Container\Service;
 
+use Poirot\Ioc\Exception\exContainerNoService;
 use Poirot\Std\Interfaces\Pact\ipConfigurable;
 use Poirot\Std\Interfaces\Struct\iData;
 
@@ -94,6 +95,11 @@ class ServiceInstance
             elseif ($this->services()->has($service)) {
                 $service = $this->services()->fresh($service, $argsAvailable);
                 $argsAvailable = null;
+            } else {
+                throw new exContainerNoService(sprintf(
+                    'Service with name (%s) not found.'
+                    , $service
+                ));
             }
         }
 

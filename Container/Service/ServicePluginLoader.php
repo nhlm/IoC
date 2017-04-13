@@ -85,9 +85,12 @@ class ServicePluginLoader
         if (false === $service = $this->_resolveTo($serviceName))
             throw new \Exception(sprintf('Cant Resolve To Plugin Service (%s).', $serviceName));
 
-        if ( is_string($service) && class_exists($service) )
+        if ( is_string($service) && class_exists($service) ) {
             // Resolved Class Name
-            $service = \Poirot\Ioc\newInitIns(new instance($service));
+            $options = \Poirot\Std\cast($this->optsData())->toArray();
+            $service = \Poirot\Ioc\newInitIns(new instance($service, $options));
+
+        }
 
         return $service;
     }

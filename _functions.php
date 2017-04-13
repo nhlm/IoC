@@ -270,7 +270,7 @@ namespace Poirot\Ioc
                 $inService->with($value);
 
                 $services->set($inService);
-                $initialized = $services->fresh($service_name);
+                $initialized = $services->get($service_name);
                 unset($config[$key]);
                 if (empty($config))
                     // only definition structure and will convert to instance only
