@@ -64,6 +64,16 @@ abstract class aContainerCapped
 
         return $return;
     }
+
+    /**
+     * List Registered Plugins Services
+     *
+     * @return array
+     */
+    function listServices()
+    {
+        return array_keys($this->services);
+    }
     
     /**
      * @override
@@ -83,6 +93,7 @@ abstract class aContainerCapped
                 , get_class($container)
             ));
 
-        return parent::nest($container, $namespace);
+        parent::nest($container, $namespace);
+        return $this;
     }
 }
