@@ -180,6 +180,7 @@ class ServiceInstance
          * @param iRepoUsersApprovedClients $UsersApprovedClients !! when ioc not present try to retrieve from current services() instance
          *                                                        !! resolve argument name here
          * @param $RepoApprovedClients                            @IoC from/current/domain/path !! resolve relative from current domain ioc
+         * // TODO also resolve @ioc @Ioc @IOC ...
          */
         $regex = '/(@param\s*)(?P<type_hint>[\w\|]+\s*|)(?P<name>[$\w\|]+\s*)(@IoC\s*|)(?P<service_path>[\w\\/._-]+\s*|)/';
         if (preg_match_all($regex, $getDocComment, $matches)) {

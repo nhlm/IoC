@@ -337,8 +337,8 @@ class BuildContainer
 
             if (is_string($key) && is_array($v))
             {
-                // [ 'ServiceName' => [':class' => 'ClassOrServiceImplementation' .. or
-                // [ 'Path\To\ClassName' => [':name' => 'ClassOrServiceImplementation', 'setter' => $value, ..
+                // [ 'ServiceName' => [':class' => 'ClassOrServiceImplementation', 'setter' => $value, .. or
+                // [ 'Path\To\ClassName' => [':name' => 'serviceName', 'setter' => $value, ..
                 // [ 'ServiceFactory' => .. or
                 // [ 'Path\To\ServiceImplementation' => [':name' => 'serviceName', 'setter' => 'value' ..,
                 $class = $key;
