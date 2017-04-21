@@ -265,7 +265,10 @@ class Container
             if ($x === '') $x = self::SEPARATOR;
 
             if ( false === $nestContainer = $this->from($x) )
-                throw new \Exception(sprintf('Nested Container (%s) not found.', $x));
+                throw new \Exception(sprintf(
+                    'Nested Container (%s) not found. while retrieve (%s).'
+                    , $x , $nameOrAlias
+                ));
 
             return $nestContainer->get($nameOrAlias, $invOpt);
         }
