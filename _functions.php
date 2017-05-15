@@ -81,7 +81,7 @@ namespace
             $nested    = str_replace('\\', Container::SEPARATOR, $namespace);
             $container = self::GetIoC()->from($nested);
 
-            if (!$container)
+            if (! $container )
                 throw new \Exception(sprintf('Nested Container (%s) not included.', $nested));
 
             return new static($container);
@@ -94,7 +94,7 @@ namespace
          */
         static function GetIoC()
         {
-            if (!self::$_IOC)
+            if (! self::$_IOC)
                 // Don't give IoC as Default
                 return new Container;
 
