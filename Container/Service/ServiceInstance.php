@@ -154,9 +154,16 @@ class ServiceInstance
                     VOID;
             }
 
+            try {
+                if ($this->services()->has($service))
+                    $argsAsService[$service] = $this->services()->get($service);
+            } catch (\Exception $e) {
+                throw new \RuntimeException(sprintf(
+                    'Error While Instantiate Class (%s) For Service (%s).'
+                    , $rClass->getName(), $service
+                ), $e->getCode(), $e);
+            }
 
-            if ($this->services()->has($service))
-                $argsAsService[$service] = $this->services()->get($service);
         }
 
 
