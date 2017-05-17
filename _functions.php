@@ -33,6 +33,17 @@ namespace
             $this->container = $container;
         }
 
+        /**
+         * Its recommended to get services object with
+         * ::GetIoC()->get('') and use __callStatic to
+         * call invokable services
+         *
+         * @param $name
+         * @param $arguments
+         *
+         * @return mixed
+         * @throws Exception
+         */
         static function __callStatic($name, $arguments)
         {
             $class     = get_class(new static);
@@ -43,10 +54,8 @@ namespace
             if (!$container)
                 throw new \Exception(sprintf('Nested Container (%s) not included.', $nested));
 
-            if ($arguments)
-                $service = $container->get($name, $arguments);
-            else
-                $service = $container->get($name);
+
+            $service = $container->get($name);
 
             # Invoke Callable With Arguments
             if (is_callable($service))
@@ -54,6 +63,7 @@ namespace
 
             return $service;
         }
+
 
         // ..
 

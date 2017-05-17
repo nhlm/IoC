@@ -281,7 +281,7 @@ class Container
         $hashed = md5($cName.\Poirot\Std\flatten($invOpt));
 
         # Service From Cache:
-        if (!array_key_exists($hashed, $this->_c_createdServices)) {
+        if (! array_key_exists($hashed, $this->_c_createdServices) ) {
             ## make new fresh instance if service not exists
             $instance = $this->fresh($nameOrAlias, $invOpt);
             $this->_c_createdServices[$hashed] = $instance;
