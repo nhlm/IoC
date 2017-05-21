@@ -47,11 +47,18 @@ namespace
         static function __callStatic($name, $arguments)
         {
             $class     = get_class(new static);
-            $namespace = substr($class, 0, strrpos($class, '\\'));
-            $nested    = str_replace('\\', Container::SEPARATOR, $namespace);
-            $container = self::GetIoC()->from($nested);
 
-            if (!$container)
+            $namespace = (substr($class, 0, 3) === 'IOC')
+                ? substr($class, 0, strrpos($class, '\\'))
+                : $class;
+
+            if ($namespace !== "")
+                $nested    = str_replace('\\', Container::SEPARATOR, $namespace);
+            else
+                $nested = Container::SEPARATOR;
+
+            $container = self::GetIoC()->from($nested);
+            if (! $container )
                 throw new \Exception(sprintf('Nested Container (%s) not included.', $nested));
 
 
