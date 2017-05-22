@@ -48,7 +48,7 @@ namespace
         {
             $class     = get_class(new static);
 
-            $namespace = (substr($class, 0, 3) === 'IOC')
+            $namespace = (substr($class, -3) === 'IOC')
                 ? substr($class, 0, strrpos($class, '\\'))
                 : $class;
 
