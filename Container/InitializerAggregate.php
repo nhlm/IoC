@@ -1,14 +1,28 @@
 <?php
 namespace Poirot\Ioc\Container;
 
+use Poirot\Ioc\Container;
 use SplPriorityQueue;
 use Poirot\Ioc\Container\Interfaces\iContainerInitializer;
+
 
 class InitializerAggregate
     implements iContainerInitializer
 {
     /** @var SplPriorityQueue */
     protected $priorityQueue;
+    protected $target;
+
+
+    /**
+     * InitializerAggregate constructor.
+     *
+     * @param $target Container target
+     */
+    function __construct($target)
+    {
+        $this->target = null;
+    }
 
     /**
      * Add Callable Method
@@ -60,12 +74,15 @@ class InitializerAggregate
     /**
      * Initialize Service
      *
-     * @param mixed $instance Service
+     * @param mixed     $instance  Service
+     * @param Container $container Container itself
      *
      * @return mixed
      */
-    function initialize($instance)
+    function initialize($instance, $container = null)
     {
+        ($container !== null) ?: $container = $this->target;
+
         foreach(clone $this->_getPriorityQueue() as $initializer)
         {
             if (!is_callable($initializer) && !$initializer instanceof iContainerInitializer)
@@ -75,13 +92,13 @@ class InitializerAggregate
                 ));
 
             if ($initializer instanceof iContainerInitializer)
-                $initializer->initialize($instance);
+                $initializer->initialize($instance, $container);
             else /* Callable */
-                $this->_initializeCallable($initializer, $instance);
+                $this->_initializeCallable($initializer, $instance, $container);
         }
     }
 
-    protected function _initializeCallable($initializer, $instance)
+    protected function _initializeCallable($initializer, $instance, $container)
     {
         if ($initializer instanceof \Closure)
             // DO_LEAST_PHPVER_SUPPORT 5.4 closure bindto
@@ -89,7 +106,7 @@ class InitializerAggregate
                 // Bind Initializer within service
                 $initializer = $initializer->bindTo($instance);
 
-        call_user_func($initializer, $instance);
+        call_user_func($initializer, $instance, $container);
     }
 
     /**

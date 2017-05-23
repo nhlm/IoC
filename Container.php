@@ -480,18 +480,18 @@ class Container
 
         // ..
 
-        $initializer = new InitializerAggregate;
+        $initializer = new InitializerAggregate($this);
 
         # attach defaults:
-        $thisContainer = $this;
-        $initializer->addCallable(function($instance) use ($thisContainer) {
+        $initializer->addCallable(function($instance, $self) {
             if ($instance instanceof iServicesAware)
                 // Inject Service Container Inside
-                $instance->setServices($thisContainer);
+                $instance->setServices($self);
         }, 10000);
 
         return $this->initializer = $initializer;
     }
+
 
     // Nested Containers:
 
