@@ -21,7 +21,7 @@ class InitializerAggregate
      */
     function __construct($target)
     {
-        $this->target = null;
+        $this->target = $target;
     }
 
     /**
