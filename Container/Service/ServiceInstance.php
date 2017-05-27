@@ -56,7 +56,16 @@ class ServiceInstance
 
         $argsAvailable = \Poirot\Std\cast($this->optsData())->toArray();
 
-        if (is_string($service)) {
+        if (is_callable($service)) {
+            $reflect = \Poirot\Std\Invokable\reflectCallable($service);
+
+            // Resolve Arguments to constructor and create new instance
+            $argsAsService = $this->_resolveServicesAsArgumentForFunc($reflect);
+            $argsAvailable = array_merge($argsAsService, $argsAvailable);
+
+            $service = \Poirot\Std\Invokable\resolveCallableWithArgs($service, $argsAvailable);
+        }
+        elseif (is_string($service)) {
             if (class_exists($service))
             {
                 $rClass        = new \ReflectionClass($service);
@@ -128,6 +137,15 @@ class ServiceInstance
     protected function _resolveServicesAsArgument(\ReflectionClass $rClass)
     {
         $rMethod  = $rClass->getMethod('__construct');
+        return $this->_resolveServicesAsArgumentForFunc($rMethod);
+    }
+
+    /**
+     * @param \ReflectionFunction $rMethod
+     * @return array
+     */
+    protected function _resolveServicesAsArgumentForFunc($rMethod)
+    {
         $mapServices = $this->__makeMapOfArgumentToService($rMethod->getDocComment());
 
         ## look for arguments as registered service ioc name
@@ -160,7 +178,7 @@ class ServiceInstance
             } catch (\Exception $e) {
                 throw new \RuntimeException(sprintf(
                     'Error While Instantiate Class (%s) For Service (%s).'
-                    , $rClass->getName(), $service
+                    , $rMethod->getName(), $service
                 ), $e->getCode(), $e);
             }
 
