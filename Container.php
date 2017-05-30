@@ -725,7 +725,8 @@ class Container
             return $this->_c_normalizedNames[$name];
 
         $canonicalName = strtolower(
-            strtr($name, array(' ' => '', '\\' => self::SEPARATOR))
+            // TODO better normalize function replace none digit and words with '' except \\ as separator
+            strtr($name, array('-'=>'', '.'=>'', '=>', '\\'=>self::SEPARATOR))
         );
 
         if (strstr($name, self::SEPARATOR) !== false)
